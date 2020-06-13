@@ -1,6 +1,7 @@
 package com.hyphenate.easeui.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -38,6 +39,7 @@ import com.stratagile.pnrouter.R;
 import com.stratagile.pnrouter.application.AppConfig;
 import com.stratagile.pnrouter.constant.ConstantValue;
 import com.stratagile.pnrouter.constant.UserDataManger;
+import com.stratagile.pnrouter.db.ActiveEntity;
 import com.stratagile.pnrouter.db.DraftEntity;
 import com.stratagile.pnrouter.db.DraftEntityDao;
 import com.stratagile.pnrouter.db.FriendEntity;
@@ -46,10 +48,13 @@ import com.stratagile.pnrouter.db.GroupEntity;
 import com.stratagile.pnrouter.db.GroupEntityDao;
 import com.stratagile.pnrouter.db.UserEntity;
 import com.stratagile.pnrouter.db.UserEntityDao;
+import com.stratagile.pnrouter.entity.ActiveList;
+import com.stratagile.pnrouter.entity.BaseBackA;
 import com.stratagile.pnrouter.entity.UnReadEMMessage;
 import com.stratagile.pnrouter.entity.events.ChangFragmentMenu;
 import com.stratagile.pnrouter.entity.events.UnReadMessageCount;
 import com.stratagile.pnrouter.entity.events.UnReadMessageZero;
+import com.stratagile.pnrouter.ui.activity.main.ActiveListActivity;
 import com.stratagile.pnrouter.utils.FireBaseUtils;
 import com.stratagile.pnrouter.utils.GsonUtil;
 import com.stratagile.pnrouter.utils.LogUtil;
@@ -66,6 +71,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import io.reactivex.functions.Consumer;
 
 /**
  * conversation list fragment
@@ -156,6 +163,7 @@ public class EaseConversationListFragment extends EaseBaseFragment {
     @Override
     protected void setUpView() {
         KLog.i("setUpView");
+        getActiveList();
         conversationList.clear();
         conversationList.addAll(loadLocalConversationList());
         KLog.i("用户名字为数量：" + conversationList.size());
@@ -205,7 +213,7 @@ public class EaseConversationListFragment extends EaseBaseFragment {
                         UserDataManger.curreantfriendUserData = friendInfo;
                         if (friendInfo != null)
                             listItemClickListener.onListItemClicked(friendInfo.getUserId(),chatType);
-                    }else{
+                    }else if ("GroupChat".equals(chatType)){
                         FireBaseUtils.logEvent(getActivity(), FireBaseUtils.FIR_CHAT_SEND_GROUP_TEXT);
                         GroupEntity groupEntity = null;
                         List<GroupEntity> localGroupList = null;
@@ -215,6 +223,9 @@ public class EaseConversationListFragment extends EaseBaseFragment {
                         UserDataManger.currentGroupData = groupEntity;
                         if (groupEntity != null)
                             listItemClickListener.onListItemClicked(groupEntity.getGId(),chatType);
+                    } else if ("ChatRoom".equals(chatType)) {
+                        KLog.i("聊天室，这里作为活动的入口了。");
+                        startActivity(new Intent(getActivity(), ActiveListActivity.class));
                     }
                 }
             });
@@ -420,17 +431,80 @@ public class EaseConversationListFragment extends EaseBaseFragment {
         return list.size();
     }
 
+    private UnReadEMMessage activeMessage;
+
+    private ActiveList mActiveList;
+
+    private void getActiveList() {
+        HashMap<String, String> map = new HashMap<>();
+        map.put("page", "1");
+        map.put("size", "20");
+        AppConfig.Companion.getInstance().getApplicationComponent().getHttpApiWrapper().getActiveList(map).subscribe(new Consumer<ActiveList>() {
+            @Override
+            public void accept(ActiveList activeList) throws Exception {
+                KLog.i("列表返回。。。");
+                mActiveList = activeList;
+//                if (activeList.getMessageList().size() == 0) {
+//                    return;
+//                }
+                handlerActiveList(activeList);
+            }
+        }, new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Exception {
+                throwable.printStackTrace();
+            }
+        });
+    }
+
+
+
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void handlerActiveList(ActiveList activeList) {
+        KLog.i("收消息");
+        String ids = "";
+        List<ActiveEntity> localActiveList = AppConfig.instance.getMDaoMaster().newSession().getActiveEntityDao().loadAll();
+        for (ActiveEntity activeEntity : localActiveList) {
+            ids += activeEntity.getActiveId();
+        }
+        KLog.i(ids);
+        int unreadCount = 0;
+        for (ActiveList.MessageListBean message : mActiveList.getMessageList()) {
+            if (!ids.contains(message.getId())) {
+                unreadCount++;
+            }
+        }
+        KLog.i("活动未读消息数为：" + unreadCount);
+        if (activeList.getMessageList().size() != 0) {
+            EMMessage message = EMMessage.createTxtSendMessage(mActiveList.getMessageList().get(0).getTitle(), "010101001");
+            message.setChatType(EMMessage.ChatType.ChatRoom);
+            UnReadEMMessage unReadEMMessage = new UnReadEMMessage(message, "", unreadCount);
+            unReadEMMessage.setActiveList(mActiveList);
+            activeMessage = unReadEMMessage;
+            AppConfig.Companion.getInstance().setUnreadMessage(activeMessage);
+        }
+
+        conversationList.clear();
+        conversationList.addAll(loadLocalConversationList());
+        EventBus.getDefault().post(new UnReadMessageCount(0));
+    }
+
     /**
      * load conversation list
      *
      * @return +
      */
     protected List<UnReadEMMessage> loadLocalConversationList() {
+
         // get all conversations
         if (UserDataManger.myUserData == null) {
             return new ArrayList<UnReadEMMessage>();
         }
         List<UnReadEMMessage> list = new ArrayList<UnReadEMMessage>();
+        if (activeMessage != null) {
+            list.add(0, activeMessage);
+        }
         try {
             Map<String, UnReadEMMessage> conversations = new HashMap<>();
             List<Pair<Long, UnReadEMMessage>> sortList = new ArrayList<Pair<Long, UnReadEMMessage>>();
@@ -441,12 +515,15 @@ public class EaseConversationListFragment extends EaseBaseFragment {
             Map<String, Object> keyMap = SpUtil.INSTANCE.getAll(AppConfig.instance);
             String userId = SpUtil.INSTANCE.getString(getActivity(), ConstantValue.INSTANCE.getUserId(), "");
             String userSn = SpUtil.INSTANCE.getString(getActivity(), ConstantValue.INSTANCE.getUserSnSp(), "");
+            KLog.i(userSn);
             int countUnMessage = 0;
             for (String key : keyMap.keySet()) {
-
                 if (key.contains(ConstantValue.INSTANCE.getMessage()) && key.contains(userSn + "_")) {
+                    KLog.i(key);
                     String tempkey = key.replace(ConstantValue.INSTANCE.getMessage(),"");
+                    KLog.i(tempkey);
                     String toChatUserId = tempkey.substring(tempkey.indexOf("_") + 1, tempkey.length());
+                    KLog.i(toChatUserId);
                     if (toChatUserId != null && !toChatUserId.equals("") && !toChatUserId.equals("null")) {
                         if(toChatUserId.indexOf("group") == 0)//这里处理群聊
                         {
@@ -508,6 +585,9 @@ public class EaseConversationListFragment extends EaseBaseFragment {
                                     case 5:
                                         String ease_default_file = PathUtils.getInstance().getImagePath() + "/" + "file_downloading.*";
                                         message = EMMessage.createFileSendMessage(ease_default_file, toChatUserId);
+                                        break;
+                                    case 17:
+                                        message = EMMessage.createTxtSendMessage(Message.getMsg(), toChatUserId);
                                         break;
                                 }
                                 if (message == null) {
@@ -579,6 +659,7 @@ public class EaseConversationListFragment extends EaseBaseFragment {
                                 if (draftEntity != null && !draftEntity.getContent().equals("")) {
                                     conversations.put(toChatUserId, new UnReadEMMessage(message, draftEntity.getContent(), Message.getUnReadCount()));
                                 } else {
+                                    KLog.i("添加对话");
                                     conversations.put(toChatUserId, new UnReadEMMessage(message, "", Message.getUnReadCount()));
                                 }
                             }
@@ -588,10 +669,14 @@ public class EaseConversationListFragment extends EaseBaseFragment {
 
                 }
             }
+            if (activeMessage != null) {
+                countUnMessage += activeMessage.getUnReadCount();
+            }
             if(countUnMessage == 0)
             {
                 EventBus.getDefault().post(new UnReadMessageZero());
             }
+            KLog.i("conversations的数量为：" + conversations.size());
             synchronized (conversations) {
                 for (UnReadEMMessage conversation : conversations.values()) {
                     String time = conversation.getEmMessage().getMsgTime() + "";
@@ -605,6 +690,7 @@ public class EaseConversationListFragment extends EaseBaseFragment {
                     }
                 }
             }
+            KLog.i("sortList的数量为：" + sortList.size());
             try {
                 // Internal is TimSort algorithm, has bug
                 sortConversationByLastChatTime(sortList);
@@ -618,7 +704,7 @@ public class EaseConversationListFragment extends EaseBaseFragment {
             }
 
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
         KLog.i("对话的数量为：" + list.size());
         return list;

@@ -14,71 +14,11 @@ public class EmailMessageEntity implements Parcelable{
     @Id(autoincrement = true)
     private Long id;
 
-    private String account;
+    private String account_;
     private String msgId;
-    private String menu;
-    private String subject;
-    private String from;
-
-    @Override
-    public String toString() {
-        return "EmailMessageEntity{" +
-                "id=" + id +
-                ", account='" + account + '\'' +
-                ", msgId='" + msgId + '\'' +
-                ", menu='" + menu + '\'' +
-                ", subject='" + subject + '\'' +
-                ", from='" + from + '\'' +
-                ", to='" + to + '\'' +
-                ", cc='" + cc + '\'' +
-                ", bcc='" + bcc + '\'' +
-                ", date='" + date + '\'' +
-                ", timeStamp=" + timeStamp +
-                ", isSeen=" + isSeen +
-                ", isStar=" + isStar +
-                ", priority='" + priority + '\'' +
-                ", isReplySign=" + isReplySign +
-                ", size=" + size +
-                ", isContainerAttachment=" + isContainerAttachment +
-                ", attachmentCount=" + attachmentCount +
-                ", content='" + content + '\'' +
-                ", contentText='" + contentText + '\'' +
-                ", originalText='" + originalText + '\'' +
-                ", aesKey='" + aesKey + '\'' +
-                ", messageTotalCount=" + messageTotalCount +
-                ", emailAttachPath='" + emailAttachPath + '\'' +
-                ", userId='" + userId + '\'' +
-                ", sortId=" + sortId +
-                ", originalBody='" + originalBody + '\'' +
-                '}';
-    }
-
-    private String to;
-    private String cc;//抄送
-    private String bcc;//密送
-    private String date;
-    private Long timeStamp;//用于排序
-    private boolean isSeen;
-    private boolean isStar;
-    private String priority;
-    private boolean isReplySign;
-    private long size;
-    private boolean isContainerAttachment;
-    private int attachmentCount;
-    private String content;
-    private String contentText;
-    private String originalText;//如果有，说明是解密出来的，否则直接用content
-    private String aesKey;
-    private long messageTotalCount;
-    private String emailAttachPath;
-    private String userId;
-    private Long sortId;//用于排序
-    private String originalBody; //原始正文，用于解析不出问题
-    
-    public EmailMessageEntity() {
-
-    }
-
+    private String menu_;
+    private String subject_;
+    private String from_;
 
     protected EmailMessageEntity(Parcel in) {
         if (in.readByte() == 0) {
@@ -86,19 +26,19 @@ public class EmailMessageEntity implements Parcelable{
         } else {
             id = in.readLong();
         }
-        account = in.readString();
+        account_ = in.readString();
         msgId = in.readString();
-        menu = in.readString();
-        subject = in.readString();
-        from = in.readString();
-        to = in.readString();
+        menu_ = in.readString();
+        subject_ = in.readString();
+        from_ = in.readString();
+        to_ = in.readString();
         cc = in.readString();
         bcc = in.readString();
-        date = in.readString();
+        date_ = in.readString();
         if (in.readByte() == 0) {
-            timeStamp = null;
+            timeStamp_ = null;
         } else {
-            timeStamp = in.readLong();
+            timeStamp_ = in.readLong();
         }
         isSeen = in.readByte() != 0;
         isStar = in.readByte() != 0;
@@ -122,25 +62,99 @@ public class EmailMessageEntity implements Parcelable{
         originalBody = in.readString();
     }
 
+    public static final Creator<EmailMessageEntity> CREATOR = new Creator<EmailMessageEntity>() {
+        @Override
+        public EmailMessageEntity createFromParcel(Parcel in) {
+            return new EmailMessageEntity(in);
+        }
 
-    @Generated(hash = 1086322148)
-    public EmailMessageEntity(Long id, String account, String msgId, String menu, String subject,
-            String from, String to, String cc, String bcc, String date, Long timeStamp, boolean isSeen,
-            boolean isStar, String priority, boolean isReplySign, long size,
+        @Override
+        public EmailMessageEntity[] newArray(int size) {
+            return new EmailMessageEntity[size];
+        }
+    };
+
+    @Override
+    public String toString() {
+        return "EmailMessageEntity{" +
+                "id=" + id +
+                ", account='" + account_ + '\'' +
+                ", msgId='" + msgId + '\'' +
+                ", menu='" + menu_ + '\'' +
+                ", subject='" + subject_ + '\'' +
+                ", from='" + from_ + '\'' +
+                ", to='" + to_ + '\'' +
+                ", cc='" + cc + '\'' +
+                ", bcc='" + bcc + '\'' +
+                ", date='" + date_ + '\'' +
+                ", timeStamp=" + timeStamp_ +
+                ", isSeen=" + isSeen +
+                ", isStar=" + isStar +
+                ", priority='" + priority + '\'' +
+                ", isReplySign=" + isReplySign +
+                ", size=" + size +
+                ", isContainerAttachment=" + isContainerAttachment +
+                ", attachmentCount=" + attachmentCount +
+                ", content='" + content + '\'' +
+                ", contentText='" + contentText + '\'' +
+                ", originalText='" + originalText + '\'' +
+                ", aesKey='" + aesKey + '\'' +
+                ", messageTotalCount=" + messageTotalCount +
+                ", emailAttachPath='" + emailAttachPath + '\'' +
+                ", userId='" + userId + '\'' +
+                ", sortId=" + sortId +
+                ", originalBody='" + originalBody + '\'' +
+                '}';
+    }
+
+    private String to_;
+    private String cc;//抄送
+    private String bcc;//密送
+    private String date_;
+    private Long timeStamp_;//用于排序
+    private boolean isSeen;
+    private boolean isStar;
+    private String priority;
+    private boolean isReplySign;
+    private long size;
+    private boolean isContainerAttachment;
+    private int attachmentCount;
+    private String content;
+    private String contentText;
+    private String originalText;//如果有，说明是解密出来的，否则直接用content
+    private String aesKey;
+    private long messageTotalCount;
+    private String emailAttachPath;
+    private String userId;
+    private Long sortId;//用于排序
+    private String originalBody; //原始正文，用于解析不出问题
+    
+    public EmailMessageEntity() {
+
+    }
+
+
+
+
+
+    @Generated(hash = 962261728)
+    public EmailMessageEntity(Long id, String account_, String msgId, String menu_, String subject_,
+            String from_, String to_, String cc, String bcc, String date_, Long timeStamp_,
+            boolean isSeen, boolean isStar, String priority, boolean isReplySign, long size,
             boolean isContainerAttachment, int attachmentCount, String content, String contentText,
             String originalText, String aesKey, long messageTotalCount, String emailAttachPath,
             String userId, Long sortId, String originalBody) {
         this.id = id;
-        this.account = account;
+        this.account_ = account_;
         this.msgId = msgId;
-        this.menu = menu;
-        this.subject = subject;
-        this.from = from;
-        this.to = to;
+        this.menu_ = menu_;
+        this.subject_ = subject_;
+        this.from_ = from_;
+        this.to_ = to_;
         this.cc = cc;
         this.bcc = bcc;
-        this.date = date;
-        this.timeStamp = timeStamp;
+        this.date_ = date_;
+        this.timeStamp_ = timeStamp_;
         this.isSeen = isSeen;
         this.isStar = isStar;
         this.priority = priority;
@@ -159,17 +173,9 @@ public class EmailMessageEntity implements Parcelable{
         this.originalBody = originalBody;
     }
 
-    public static final Creator<EmailMessageEntity> CREATOR = new Creator<EmailMessageEntity>() {
-        @Override
-        public EmailMessageEntity createFromParcel(Parcel in) {
-            return new EmailMessageEntity(in);
-        }
 
-        @Override
-        public EmailMessageEntity[] newArray(int size) {
-            return new EmailMessageEntity[size];
-        }
-    };
+
+
 
     public Long getId() {
         return id;
@@ -179,12 +185,12 @@ public class EmailMessageEntity implements Parcelable{
         this.id = id;
     }
 
-    public String getAccount() {
-        return account;
+    public String getAccount_() {
+        return account_;
     }
 
-    public void setAccount(String account) {
-        this.account = account;
+    public void setAccount_(String account_) {
+        this.account_ = account_;
     }
 
     public String getMsgId() {
@@ -195,36 +201,36 @@ public class EmailMessageEntity implements Parcelable{
         this.msgId = msgId;
     }
 
-    public String getMenu() {
-        return menu;
+    public String getMenu_() {
+        return menu_;
     }
 
-    public void setMenu(String menu) {
-        this.menu = menu;
+    public void setMenu_(String menu_) {
+        this.menu_ = menu_;
     }
 
-    public String getSubject() {
-        return subject;
+    public String getSubject_() {
+        return subject_;
     }
 
-    public void setSubject(String subject) {
-        this.subject = subject;
+    public void setSubject_(String subject_) {
+        this.subject_ = subject_;
     }
 
-    public String getFrom() {
-        return from;
+    public String getFrom_() {
+        return from_;
     }
 
-    public void setFrom(String from) {
-        this.from = from;
+    public void setFrom_(String from_) {
+        this.from_ = from_;
     }
 
-    public String getTo() {
-        return to;
+    public String getTo_() {
+        return to_;
     }
 
-    public void setTo(String to) {
-        this.to = to;
+    public void setTo_(String to_) {
+        this.to_ = to_;
     }
 
     public String getCc() {
@@ -243,20 +249,20 @@ public class EmailMessageEntity implements Parcelable{
         this.bcc = bcc;
     }
 
-    public String getDate() {
-        return date;
+    public String getDate_() {
+        return date_;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setDate_(String date_) {
+        this.date_ = date_;
     }
 
-    public Long getTimeStamp() {
-        return timeStamp;
+    public Long getTimeStamp_() {
+        return timeStamp_;
     }
 
-    public void setTimeStamp(Long timeStamp) {
-        this.timeStamp = timeStamp;
+    public void setTimeStamp_(Long timeStamp_) {
+        this.timeStamp_ = timeStamp_;
     }
 
     public boolean isSeen() {
@@ -416,20 +422,20 @@ public class EmailMessageEntity implements Parcelable{
             dest.writeByte((byte) 1);
             dest.writeLong(id);
         }
-        dest.writeString(account);
+        dest.writeString(account_);
         dest.writeString(msgId);
-        dest.writeString(menu);
-        dest.writeString(subject);
-        dest.writeString(from);
-        dest.writeString(to);
+        dest.writeString(menu_);
+        dest.writeString(subject_);
+        dest.writeString(from_);
+        dest.writeString(to_);
         dest.writeString(cc);
         dest.writeString(bcc);
-        dest.writeString(date);
-        if (timeStamp == null) {
+        dest.writeString(date_);
+        if (timeStamp_ == null) {
             dest.writeByte((byte) 0);
         } else {
             dest.writeByte((byte) 1);
-            dest.writeLong(timeStamp);
+            dest.writeLong(timeStamp_);
         }
         dest.writeByte((byte) (isSeen ? 1 : 0));
         dest.writeByte((byte) (isStar ? 1 : 0));

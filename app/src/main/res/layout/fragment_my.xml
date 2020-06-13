@@ -112,6 +112,15 @@
             app:textmy="@string/Help_Center">
 
         </com.stratagile.pnrouter.view.DrawableMyTextView>
+        <View style="@style/divide_line" />
+        <com.stratagile.pnrouter.view.DrawableMyTextView
+            android:id="@+id/feedback"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/x92"
+            app:srcmy="@mipmap/me_feedback"
+            app:textmy="Feedback">
+
+        </com.stratagile.pnrouter.view.DrawableMyTextView>
         <com.stratagile.pnrouter.view.DrawableMyTextView
             android:visibility="gone"
             android:id="@+id/shareApp"

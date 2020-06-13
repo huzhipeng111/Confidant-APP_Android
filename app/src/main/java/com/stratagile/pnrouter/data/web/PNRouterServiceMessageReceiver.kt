@@ -653,6 +653,14 @@ val credentialsProvider: CredentialsProvider, private
                     pullBakContentCallback?.delBakContentBack(JDelBakContentRsp)
                     pullSecondBakContentCallback?.delBakContentBack(JDelBakContentRsp)
                 }
+                "GetWalletAccount" -> {
+                    var jGetWalletAccountReq = gson.fromJson(text, JGetWalletAccountRsp::class.java)
+                    walletAccountCallback?.getWalletAccountBack(jGetWalletAccountReq)
+                }
+                "SetWalletAccount" -> {
+                    var jSetWalletAccountRsp = gson.fromJson(text, JSetWalletAccountRsp::class.java)
+                    walletAccountCallback?.setWalletAccountBack(jSetWalletAccountRsp)
+                }
             }
         }
 
@@ -762,7 +770,9 @@ val credentialsProvider: CredentialsProvider, private
 
     var getBakContentStatCallback:GetBakContentStatCallback? = null
     var pullBakContentCallback:PullBakContentCallback? = null;
-    var pullSecondBakContentCallback:PullBakContentCallback? = null;
+    var pullSecondBakContentCallback:PullBakContentCallback? = null
+
+    var walletAccountCallback : WalletAccountCallback? = null
 
     /**
      * Construct a PNRouterServiceMessageReceiver.
@@ -1190,6 +1200,11 @@ val credentialsProvider: CredentialsProvider, private
     interface PullBakContentCallback {
         fun pullBakContentBack(jPullBakContentRsp: JPullBakContentRsp)
         fun delBakContentBack(jDelBakContentRsp: JDelBakContentRsp)
+    }
+
+    interface WalletAccountCallback {
+        fun getWalletAccountBack(jGetWalletAccountRsp: JGetWalletAccountRsp)
+        fun setWalletAccountBack(jSetWalletAccountRsp: JSetWalletAccountRsp)
     }
 }
 

@@ -152,7 +152,7 @@ class EmailEditActivity : BaseActivity(), EmailEditContract.View , PNRouterServi
         {
             AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.delete(item)
         }
-        var localEmailMessageList = AppConfig.instance.mDaoMaster!!.newSession().emailMessageEntityDao.queryBuilder().where(EmailMessageEntityDao.Properties.Account.eq(currentChooseConfig!!.account)).list()
+        var localEmailMessageList = AppConfig.instance.mDaoMaster!!.newSession().emailMessageEntityDao.queryBuilder().where(EmailMessageEntityDao.Properties.Account_.eq(currentChooseConfig!!.account)).list()
         for (item in localEmailMessageList)
         {
             AppConfig.instance.mDaoMaster!!.newSession().emailMessageEntityDao.delete(item)

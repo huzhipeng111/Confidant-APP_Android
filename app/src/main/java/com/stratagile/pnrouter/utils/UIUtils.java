@@ -15,6 +15,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 
+import com.stratagile.pnrouter.R;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -119,9 +121,9 @@ public class UIUtils {
 
 
     public static void configSwipeRefreshLayoutColors(SwipeRefreshLayout layout) {
-        layout.setColorSchemeResources(android.R.color.holo_blue_bright,
-                android.R.color.holo_green_light, android.R.color.holo_orange_light,
-                android.R.color.holo_red_light);
+        layout.setColorSchemeResources(R.color.mainColor,
+                R.color.mainColor, R.color.mainColor,
+                R.color.mainColor);
     }
 
 

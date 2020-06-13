@@ -22,23 +22,23 @@ class KotlinToxService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        val toxCallbackListener = ToxCallbackListener()
-        val dataFile = File(Environment.getExternalStorageDirectory().toString() + ConstantValue.localPath, "")
-        if (!dataFile.exists()) {
-            dataFile.mkdir()
-        }
-        val path = dataFile.path + "/"
-        ToxCoreJni.getInstance().toxCallbackListener = toxCallbackListener
-        thread = thread(true, false, null, "toxThread", -1) {
-            ToxCoreJni.getInstance().createTox(path)
-        }
+//        val toxCallbackListener = ToxCallbackListener()
+//        val dataFile = File(Environment.getExternalStorageDirectory().toString() + ConstantValue.localPath, "")
+//        if (!dataFile.exists()) {
+//            dataFile.mkdir()
+//        }
+//        val path = dataFile.path + "/"
+//        ToxCoreJni.getInstance().toxCallbackListener = toxCallbackListener
+//        thread = thread(true, false, null, "toxThread", -1) {
+//            ToxCoreJni.getInstance().createTox(path)
+//        }
     }
 
     override fun onDestroy() {
         ToxCoreJni.getInstance().toxKill()
         ConstantValue.isToxConnected = false
         ConstantValue.freindStatus = 0
-        ToxCoreJni.getInstance().toxCallbackListener = null
+//        ToxCoreJni.getInstance().toxCallbackListener = null
         super.onDestroy()
     }
 }

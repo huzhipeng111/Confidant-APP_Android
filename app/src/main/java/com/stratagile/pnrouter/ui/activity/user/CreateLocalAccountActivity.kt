@@ -314,6 +314,12 @@ class CreateLocalAccountActivity : BaseActivity(), CreateLocalAccountContract.Vi
                 localMiArrayList.add(RSAData)
                 FileUtil.saveKeyData(gson.toJson(localMiArrayList),"libsodiumdata_mi")
 
+                var dst_public_TemKey_My = ByteArray(32)
+                var dst_private_Temkey_My = ByteArray(32)
+                var crypto_box_keypair_Temresult = Sodium.crypto_box_keypair(dst_public_TemKey_My, dst_private_Temkey_My)
+                ConstantValue.libsodiumprivateTemKey = RxEncodeTool.base64Encode2String(dst_private_Temkey_My)
+                ConstantValue.libsodiumpublicTemKey = RxEncodeTool.base64Encode2String(dst_public_TemKey_My)
+
 
             }else{
                 var signStr = signData

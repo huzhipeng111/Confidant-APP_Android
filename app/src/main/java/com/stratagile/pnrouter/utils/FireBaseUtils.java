@@ -35,6 +35,12 @@ public class FireBaseUtils {
     public static String FIR_CONTACTS_RECOVER = "start_contactsRecover";
     public static String FIR_CONTACT_DEL = "start_contactDelete";
 
+    public static String FIR_ADD_WALLET_ADDRESS = "add_wallet_address";
+    public static String FIR_CHECK_CAMPAIGN = "check_campaign";
+
+    public static String FIR_INVATE_FRIEND = "send_invite_friends";
+    public static String FIR_AGREE_ADD = "Agree to add";
+
     public static void logEvent(Context context, String event) {
         Bundle bundle = new Bundle();
         bundle.putString(FirebaseAnalytics.Param.ITEM_ID, event);

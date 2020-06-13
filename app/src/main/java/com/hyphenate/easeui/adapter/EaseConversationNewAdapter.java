@@ -144,7 +144,7 @@ public class EaseConversationNewAdapter extends ArrayAdapter<UnReadEMMessage> {
                 username = friendUser.getRemarks();
             }
             usernameSouce = new String(RxEncodeTool.base64Decode(username));
-        } else {
+        } else if ("GroupChat".equals(chatType)){
             List<GroupEntity> localGroupList = null;
             localGroupList = AppConfig.instance.getMDaoMaster().newSession().getGroupEntityDao().loadAll();
             localGroupList = AppConfig.instance.getMDaoMaster().newSession().getGroupEntityDao().queryBuilder().where(GroupEntityDao.Properties.GId.eq(lastMessage.getEmMessage().getTo())).list();
@@ -154,6 +154,8 @@ public class EaseConversationNewAdapter extends ArrayAdapter<UnReadEMMessage> {
             localFriendList = AppConfig.instance.getMDaoMaster().newSession().getUserEntityDao().queryBuilder().where(UserEntityDao.Properties.UserId.eq(lastMessage.getEmMessage().getFrom())).list();
             if (localFriendList.size() > 0)
                 friendUser = localFriendList.get(0);
+        } else if ("ChatRoom".equals(chatType)) {
+
         }
 
         if (conversation.getEmMessage().getChatType() == EMMessage.ChatType.GroupChat) {
@@ -178,10 +180,9 @@ public class EaseConversationNewAdapter extends ArrayAdapter<UnReadEMMessage> {
             holder.userRouter.setText("");
             holder.avatar.setGroupHeadImage();
         } else if (conversation.getEmMessage().getChatType() == EMMessage.ChatType.ChatRoom) {
-//            holder.avatar.setImageResource(R.drawable.ease_group_icon);
-            EMChatRoom room = EMClient.getInstance().chatroomManager().getChatRoom(conversationId);
-            holder.name.setText(room != null && !TextUtils.isEmpty(room.getName()) ? room.getName() : usernameSouce);
             holder.motioned.setVisibility(View.GONE);
+            holder.userRouter.setVisibility(View.GONE);
+            holder.name.setText(R.string.campaign_update);
         } else {
 //            EaseUserUtils.setUserAvatar(getContext(), conversationId, holder.avatar);
             //EaseUserUtils.setUserNick(username, holder.name);
@@ -202,18 +203,6 @@ public class EaseConversationNewAdapter extends ArrayAdapter<UnReadEMMessage> {
             holder.motioned.setVisibility(View.GONE);
         }
 
-//        EaseAvatarOptions avatarOptions = EaseUI.getInstance().getAvatarOptions();
-//        if(avatarOptions != null && holder.avatar instanceof EaseImageView) {
-//            EaseImageView avatarView = ((EaseImageView) holder.avatar);
-//            if (avatarOptions.getAvatarShape() != 0)
-//                avatarView.setShapeType(avatarOptions.getAvatarShape());
-//            if (avatarOptions.getAvatarBorderWidth() != 0)
-//                avatarView.setBorderWidth(avatarOptions.getAvatarBorderWidth());
-//            if (avatarOptions.getAvatarBorderColor() != 0)
-//                avatarView.setBorderColor(avatarOptions.getAvatarBorderColor());
-//            if (avatarOptions.getAvatarRadius() != 0)
-//                avatarView.setRadius(avatarOptions.getAvatarRadius());
-//        }
         String userId = SpUtil.INSTANCE.getString(AppConfig.instance, ConstantValue.INSTANCE.getUserId(), "");
         String userSn = SpUtil.INSTANCE.getString(AppConfig.instance, ConstantValue.INSTANCE.getUserSnSp(), "");
         if (lastMessage.getUnReadCount() != 0) {
@@ -284,7 +273,7 @@ public class EaseConversationNewAdapter extends ArrayAdapter<UnReadEMMessage> {
             //没有草稿
             if (chatType.equals("Chat")) {
                 holder.message.setText(EaseSmileUtils.getSmiledText(getContext(), holder.message.getText().toString()));
-            } else {
+            } else if (chatType.equals("GroupChat")){
                 String messageContent =  holder.message.getText().toString();
                 String name = SpUtil.INSTANCE.getString(AppConfig.instance, ConstantValue.INSTANCE.getUsername(), "");
 
@@ -298,6 +287,9 @@ public class EaseConversationNewAdapter extends ArrayAdapter<UnReadEMMessage> {
                     holder.message.setText(EaseSmileUtils.getSmiledText(getContext(), usernameSouce + ": " + holder.message.getText().toString()));
                 }
 
+            } else if ("ChatRoom".equals(chatType)){
+                holder.avatar.setImageResource(R.mipmap.icon_avatar_active, false);
+                holder.message.setText(EaseSmileUtils.getSmiledText(getContext(), holder.message.getText().toString()));
             }
             holder.draft.setText("");
         }

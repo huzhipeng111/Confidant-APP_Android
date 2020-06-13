@@ -75,6 +75,15 @@ public class BottomSheet extends Dialog {
     protected boolean fullWidth;
     protected boolean isFullscreen;
     protected ColorDrawable backDrawable = new ColorDrawable(0xff000000);
+    private int filterColor = 0xffffffff;
+
+    public int getFilterColor() {
+        return filterColor;
+    }
+
+    public void setFilterColor(int filterColor) {
+        this.filterColor = filterColor;
+    }
 
     private boolean canDismissWithSwipe = true;
 
@@ -557,7 +566,7 @@ public class BottomSheet extends Dialog {
         }
     }
 
-    public BottomSheet(Context context, boolean needFocus) {
+    public BottomSheet(Context context, boolean needFocus, int filterColor) {
         super(context, R.style.TransparentDialog);
 
         if (Build.VERSION.SDK_INT >= 21) {
@@ -567,8 +576,9 @@ public class BottomSheet extends Dialog {
         touchSlop = vc.getScaledTouchSlop();
 
         Rect padding = new Rect();
+        this.filterColor = filterColor;
         shadowDrawable = context.getResources().getDrawable(R.drawable.sheet_shadow_round).mutate();
-        shadowDrawable.setColorFilter(new PorterDuffColorFilter(0xffffffff, PorterDuff.Mode.MULTIPLY));
+        shadowDrawable.setColorFilter(new PorterDuffColorFilter(filterColor, PorterDuff.Mode.MULTIPLY));
         shadowDrawable.getPadding(padding);
         backgroundPaddingLeft = padding.left;
         backgroundPaddingTop = padding.top;
@@ -1070,11 +1080,14 @@ public class BottomSheet extends Dialog {
         private BottomSheet bottomSheet;
 
         public Builder(Context context) {
-            bottomSheet = new BottomSheet(context, false);
+            bottomSheet = new BottomSheet(context, false, 0xffffffff);
         }
 
         public Builder(Context context, boolean needFocus) {
-            bottomSheet = new BottomSheet(context, needFocus);
+            bottomSheet = new BottomSheet(context, needFocus, 0xffffffff);
+        }
+        public Builder(Context context, boolean needFocus, int filterColor) {
+            bottomSheet = new BottomSheet(context, needFocus, filterColor);
         }
 
         public Builder setItems(CharSequence[] items, final OnClickListener onClickListener) {

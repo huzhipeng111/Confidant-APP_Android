@@ -1,19 +1,10 @@
 package com.stratagile.pnrouter.ui.activity.main
 
-import android.app.Activity
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
-import android.content.pm.ProviderInfo
-import android.database.Cursor
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.provider.MediaStore
-import android.support.v4.content.FileProvider
-import android.util.Log
 import android.view.View
 import com.socks.library.KLog
 import com.stratagile.pnrouter.BuildConfig
@@ -30,10 +21,6 @@ import com.stratagile.pnrouter.ui.activity.main.presenter.SplashPresenter
 import com.stratagile.pnrouter.utils.*
 import org.libsodium.jni.NaCl
 import org.libsodium.jni.Sodium
-import java.io.File
-import java.lang.reflect.InvocationTargetException
-import java.lang.reflect.Method
-import java.net.URI
 import javax.inject.Inject
 
 
@@ -107,7 +94,6 @@ class SplashActivity : BaseActivity(), SplashContract.View {
         sentContent = false
         super.onCreate(savedInstanceState)
         StatusBarCompat.translucentStatusBar(this, false)
-
         KLog.i("SplashActivityAAAA：onCreate")
         var sodium: Sodium = NaCl.sodium()
         AppConfig.instance.stopAllService()

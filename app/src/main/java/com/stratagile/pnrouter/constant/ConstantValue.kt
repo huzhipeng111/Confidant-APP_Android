@@ -115,8 +115,8 @@ object ConstantValue {
     var mHuaWeiRegId = ""
     var mJiGuangRegId = ""
     //        var pushURL = "http://47.96.76.184:9000/v1/pareg"
-    var pushURL = "https://pprouter.online:9001/v1/pareg"
-//    var pushURL = "https://47.244.138.61:9001/v1/pareg/appPushRegHashGet"
+//    var pushURL = "https://pprouter.online:9001/v1/pareg"
+    var pushURL = "https://pprouter.online:9001/v1/pareg/appPushInfoReg"
     var loginOut = false//是否登出
     var logining = false//登录状态
     var freindStatus = 0

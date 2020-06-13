@@ -21,6 +21,7 @@ import com.stratagile.pnrouter.db.DraftEntity;
 import com.stratagile.pnrouter.db.EmailConfigEntity;
 import com.stratagile.pnrouter.db.LocalFileMenu;
 import com.stratagile.pnrouter.db.EmailCidEntity;
+import com.stratagile.pnrouter.db.ActiveEntity;
 import com.stratagile.pnrouter.db.FriendEntity;
 import com.stratagile.pnrouter.db.GroupEntity;
 import com.stratagile.pnrouter.db.QLCAccount;
@@ -41,6 +42,7 @@ import com.stratagile.pnrouter.db.DraftEntityDao;
 import com.stratagile.pnrouter.db.EmailConfigEntityDao;
 import com.stratagile.pnrouter.db.LocalFileMenuDao;
 import com.stratagile.pnrouter.db.EmailCidEntityDao;
+import com.stratagile.pnrouter.db.ActiveEntityDao;
 import com.stratagile.pnrouter.db.FriendEntityDao;
 import com.stratagile.pnrouter.db.GroupEntityDao;
 import com.stratagile.pnrouter.db.QLCAccountDao;
@@ -70,6 +72,7 @@ public class DaoSession extends AbstractDaoSession {
     private final DaoConfig emailConfigEntityDaoConfig;
     private final DaoConfig localFileMenuDaoConfig;
     private final DaoConfig emailCidEntityDaoConfig;
+    private final DaoConfig activeEntityDaoConfig;
     private final DaoConfig friendEntityDaoConfig;
     private final DaoConfig groupEntityDaoConfig;
     private final DaoConfig qLCAccountDaoConfig;
@@ -90,6 +93,7 @@ public class DaoSession extends AbstractDaoSession {
     private final EmailConfigEntityDao emailConfigEntityDao;
     private final LocalFileMenuDao localFileMenuDao;
     private final EmailCidEntityDao emailCidEntityDao;
+    private final ActiveEntityDao activeEntityDao;
     private final FriendEntityDao friendEntityDao;
     private final GroupEntityDao groupEntityDao;
     private final QLCAccountDao qLCAccountDao;
@@ -140,6 +144,9 @@ public class DaoSession extends AbstractDaoSession {
         emailCidEntityDaoConfig = daoConfigMap.get(EmailCidEntityDao.class).clone();
         emailCidEntityDaoConfig.initIdentityScope(type);
 
+        activeEntityDaoConfig = daoConfigMap.get(ActiveEntityDao.class).clone();
+        activeEntityDaoConfig.initIdentityScope(type);
+
         friendEntityDaoConfig = daoConfigMap.get(FriendEntityDao.class).clone();
         friendEntityDaoConfig.initIdentityScope(type);
 
@@ -171,6 +178,7 @@ public class DaoSession extends AbstractDaoSession {
         emailConfigEntityDao = new EmailConfigEntityDao(emailConfigEntityDaoConfig, this);
         localFileMenuDao = new LocalFileMenuDao(localFileMenuDaoConfig, this);
         emailCidEntityDao = new EmailCidEntityDao(emailCidEntityDaoConfig, this);
+        activeEntityDao = new ActiveEntityDao(activeEntityDaoConfig, this);
         friendEntityDao = new FriendEntityDao(friendEntityDaoConfig, this);
         groupEntityDao = new GroupEntityDao(groupEntityDaoConfig, this);
         qLCAccountDao = new QLCAccountDao(qLCAccountDaoConfig, this);
@@ -191,6 +199,7 @@ public class DaoSession extends AbstractDaoSession {
         registerDao(EmailConfigEntity.class, emailConfigEntityDao);
         registerDao(LocalFileMenu.class, localFileMenuDao);
         registerDao(EmailCidEntity.class, emailCidEntityDao);
+        registerDao(ActiveEntity.class, activeEntityDao);
         registerDao(FriendEntity.class, friendEntityDao);
         registerDao(GroupEntity.class, groupEntityDao);
         registerDao(QLCAccount.class, qLCAccountDao);
@@ -213,6 +222,7 @@ public class DaoSession extends AbstractDaoSession {
         emailConfigEntityDaoConfig.clearIdentityScope();
         localFileMenuDaoConfig.clearIdentityScope();
         emailCidEntityDaoConfig.clearIdentityScope();
+        activeEntityDaoConfig.clearIdentityScope();
         friendEntityDaoConfig.clearIdentityScope();
         groupEntityDaoConfig.clearIdentityScope();
         qLCAccountDaoConfig.clearIdentityScope();
@@ -271,6 +281,10 @@ public class DaoSession extends AbstractDaoSession {
 
     public EmailCidEntityDao getEmailCidEntityDao() {
         return emailCidEntityDao;
+    }
+
+    public ActiveEntityDao getActiveEntityDao() {
+        return activeEntityDao;
     }
 
     public FriendEntityDao getFriendEntityDao() {

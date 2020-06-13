@@ -29,6 +29,7 @@ import com.huawei.hms.aaid.HmsInstanceId
 import com.hyphenate.easeui.EaseUI
 import com.message.MessageProvider
 import com.message.UserProvider
+import com.previewlibrary.ZoomMediaLoader
 import com.smailnet.eamil.EmailConfig
 import com.socks.library.KLog
 import com.stratagile.pnrouter.BuildConfig
@@ -41,11 +42,9 @@ import com.stratagile.pnrouter.data.tox.ToxMessageReceiver
 import com.stratagile.pnrouter.data.web.*
 import com.stratagile.pnrouter.data.web.Optional
 import com.stratagile.pnrouter.db.DaoMaster
+import com.stratagile.pnrouter.db.EmailMessageEntity
 import com.stratagile.pnrouter.db.MySQLiteOpenHelper
-import com.stratagile.pnrouter.entity.BaseData
-import com.stratagile.pnrouter.entity.HeartBeatReq
-import com.stratagile.pnrouter.entity.JGroupMsgPushRsp
-import com.stratagile.pnrouter.entity.JPushMsgRsp
+import com.stratagile.pnrouter.entity.*
 import com.stratagile.pnrouter.entity.events.ForegroundCallBack
 import com.stratagile.pnrouter.entity.events.StartVerify
 import com.stratagile.pnrouter.telegram.AndroidUtilities
@@ -92,6 +91,9 @@ class AppConfig : MultiDexApplication() {
 
     lateinit var applicationHandler: Handler
 
+    var emailInfoMessageEntity : EmailMessageEntity? = null
+    var emailSendoMessageEntity : EmailMessageEntity? = null
+
 
     val point = Point()
 
@@ -110,6 +112,8 @@ class AppConfig : MultiDexApplication() {
     var SCOPES = arrayOf(GmailScopes.GMAIL_LABELS, GmailScopes.MAIL_GOOGLE_COM, GmailScopes.GMAIL_READONLY, GmailScopes.GMAIL_MODIFY)
     var transport = AndroidHttp.newCompatibleTransport()
     var jsonFactory = GsonFactory.getDefaultInstance()
+
+    var unreadMessage : UnReadEMMessage? = null
     private var mScreenCaptureBitmap: Bitmap? = null
 
     override fun onCreate() {
@@ -133,6 +137,7 @@ class AppConfig : MultiDexApplication() {
         FirebaseApp.initializeApp(this)
         FirebaseMessaging.getInstance().isAutoInitEnabled = true
         DotLog.init()
+        ZoomMediaLoader.getInstance().init(ImageLoader())
         EaseUI.getInstance().init(this, null)
         //EMClient.getInstance().setDebugMode(true)
         instance = this
@@ -148,7 +153,8 @@ class AppConfig : MultiDexApplication() {
             thread {
                 try {
                     //                HmsInstanceId.getInstance(this).deleteToken("102030623", "HCM")
-                    HmsInstanceId.getInstance(this).getToken("102030623", "HCM")
+                    var hmsToken = HmsInstanceId.getInstance(this).getToken("102030623", "HCM")
+                    ConstantValue.mHuaWeiRegId = hmsToken
                 }catch (e : Exception) {
                     e.printStackTrace()
                 }
@@ -164,6 +170,7 @@ class AppConfig : MultiDexApplication() {
         }*/
         JPushInterface.setDebugMode(BuildConfig.DEBUG)    // 设置开启日志,发布时请关闭日志
         JPushInterface.init(this)            // 初始化 JPush
+
         AndroidUtilities.checkDisplaySize(this, null)
         /* var intent =  Intent(this, MyService::class.java)
          var sender= PendingIntent.getService(this, 0, intent, 0);

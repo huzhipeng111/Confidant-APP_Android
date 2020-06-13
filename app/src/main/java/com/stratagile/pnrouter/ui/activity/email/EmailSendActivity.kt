@@ -8,7 +8,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.*
-import android.media.MediaScannerConnection
 import android.net.Uri
 import android.net.http.SslError
 import android.os.Build
@@ -73,7 +72,6 @@ import com.stratagile.pnrouter.ui.activity.email.presenter.EmailSendPresenter
 import com.stratagile.pnrouter.ui.activity.email.view.ColorPickerView
 import com.stratagile.pnrouter.ui.activity.email.view.RichEditor
 import com.stratagile.pnrouter.ui.activity.email.view.SemicolonTokenizer
-import com.stratagile.pnrouter.ui.activity.file.FileChooseActivity
 import com.stratagile.pnrouter.ui.adapter.conversation.EmaiAttachAdapter
 import com.stratagile.pnrouter.utils.*
 import com.stratagile.pnrouter.view.SweetAlertDialog
@@ -217,6 +215,7 @@ class EmailSendActivity : BaseActivity(), EmailSendContract.View, View.OnClickLi
 
     //flag == 3为外界选中一个文件作为附件发送邮件
     var flag = 0;
+    //forward == 1 为转发，
     var foward = 0;
     var emailMeaasgeInfoData: EmailMessageEntity? = null
     var oldAdress = ""
@@ -319,7 +318,9 @@ class EmailSendActivity : BaseActivity(), EmailSendContract.View, View.OnClickLi
         var adapterbcc = ArrayAdapter<String>(this@EmailSendActivity, android.R.layout.simple_dropdown_item_1line, dataTips)
         bccAdressEdit!!.setAdapter(adapterbcc)
         bccAdressEdit!!.setTokenizer(SemicolonTokenizer(';'))
-        emailMeaasgeInfoData = intent.getParcelableExtra("emailMeaasgeInfoData")
+
+        emailMeaasgeInfoData = AppConfig.instance.emailSendoMessageEntity
+//        emailMeaasgeInfoData = intent.getParcelableExtra("emailMeaasgeInfoData")
         flag = intent.getIntExtra("flag", 0)
         foward = intent.getIntExtra("foward", 0)
         attach = intent.getIntExtra("attach", 0)
@@ -367,7 +368,11 @@ class EmailSendActivity : BaseActivity(), EmailSendContract.View, View.OnClickLi
             addKeyImgParent.visibility = View.GONE
             attachList.visibility = View.GONE
             re_main_editor.visibility = View.GONE
-            var myAccount = ConstantValue.currentEmailConfigEntity!!.account
+
+            var myAccount = ""
+            if (ConstantValue.currentEmailConfigEntity != null) {
+                myAccount = ConstantValue.currentEmailConfigEntity!!.account
+            }
             subject.setText(getString(R.string.You_got_an_email_from_your_friend) + " " + myAccount) //"You got an email from your friend xxxx@gmail.com"
             val lp = LinearLayout.LayoutParams(webViewParent.getLayoutParams())
             lp.setMargins(0, 0, 0, 0)
@@ -943,29 +948,29 @@ class EmailSendActivity : BaseActivity(), EmailSendContract.View, View.OnClickLi
     fun initBaseUI(emailMessageEntity: EmailMessageEntity) {
         var fromName = ""
         var fromAdress = ""
-        if (emailMessageEntity!!.from.indexOf("<") >= 0) {
-            fromName = emailMessageEntity!!.from.substring(0, emailMessageEntity!!.from.indexOf("<"))
-            fromAdress = emailMessageEntity!!.from.substring(emailMessageEntity!!.from.indexOf("<") + 1, emailMessageEntity!!.from.length - 1)
+        if (emailMessageEntity!!.from_.indexOf("<") >= 0) {
+            fromName = emailMessageEntity!!.from_.substring(0, emailMessageEntity!!.from_.indexOf("<"))
+            fromAdress = emailMessageEntity!!.from_.substring(emailMessageEntity!!.from_.indexOf("<") + 1, emailMessageEntity!!.from_.length - 1)
         } else {
-            fromName = emailMessageEntity!!.from.substring(0, emailMessageEntity!!.from.indexOf("@"))
-            fromAdress = emailMessageEntity!!.from.substring(0, emailMessageEntity!!.from.length)
+            fromName = emailMessageEntity!!.from_.substring(0, emailMessageEntity!!.from_.indexOf("@"))
+            fromAdress = emailMessageEntity!!.from_.substring(0, emailMessageEntity!!.from_.length)
         }
-        var subjectText = emailMessageEntity.subject
+        var subjectText = emailMessageEntity.subject_
         if (foward == 0) {
-            if (emailMessageEntity!!.from.indexOf("<") >= 0) {
-                fromName = emailMessageEntity!!.from.substring(0, emailMessageEntity!!.from.indexOf("<"))
-                fromAdress = emailMessageEntity!!.from.substring(emailMessageEntity!!.from.indexOf("<") + 1, emailMessageEntity!!.from.length - 1)
+            if (emailMessageEntity!!.from_.indexOf("<") >= 0) {
+                fromName = emailMessageEntity!!.from_.substring(0, emailMessageEntity!!.from_.indexOf("<"))
+                fromAdress = emailMessageEntity!!.from_.substring(emailMessageEntity!!.from_.indexOf("<") + 1, emailMessageEntity!!.from_.length - 1)
             } else {
-                fromName = emailMessageEntity!!.from.substring(0, emailMessageEntity!!.from.indexOf("@"))
-                fromAdress = emailMessageEntity!!.from.substring(0, emailMessageEntity!!.from.length)
+                fromName = emailMessageEntity!!.from_.substring(0, emailMessageEntity!!.from_.indexOf("@"))
+                fromAdress = emailMessageEntity!!.from_.substring(0, emailMessageEntity!!.from_.length)
             }
         } else if (foward == 3) {
-            if (emailMessageEntity!!.to.indexOf("<") >= 0) {
-                fromName = emailMessageEntity!!.to.substring(0, emailMessageEntity!!.to.indexOf("<"))
-                fromAdress = emailMessageEntity!!.to.substring(emailMessageEntity!!.to.indexOf("<") + 1, emailMessageEntity!!.to.length - 1)
+            if (emailMessageEntity!!.to_.indexOf("<") >= 0) {
+                fromName = emailMessageEntity!!.to_.substring(0, emailMessageEntity!!.to_.indexOf("<"))
+                fromAdress = emailMessageEntity!!.to_.substring(emailMessageEntity!!.to_.indexOf("<") + 1, emailMessageEntity!!.to_.length - 1)
             } else {
-                fromName = emailMessageEntity!!.to.substring(0, emailMessageEntity!!.to.indexOf("@"))
-                fromAdress = emailMessageEntity!!.to.substring(0, emailMessageEntity!!.to.length)
+                fromName = emailMessageEntity!!.to_.substring(0, emailMessageEntity!!.to_.indexOf("@"))
+                fromAdress = emailMessageEntity!!.to_.substring(0, emailMessageEntity!!.to_.length)
             }
         }
         var localEmailContacts = AppConfig.instance.mDaoMaster!!.newSession().emailContactsEntityDao.queryBuilder().where(EmailContactsEntityDao.Properties.Account.eq(fromAdress)).list()
@@ -976,7 +981,7 @@ class EmailSendActivity : BaseActivity(), EmailSendContract.View, View.OnClickLi
         fromName = fromName.replace("\"", "")
         fromName = fromName.replace("\"", "")
 
-        if (emailMessageEntity!!.to.contains(",")) {
+        if (emailMessageEntity!!.to_.contains(",")) {
 
             //title_info.setText(fromName.trim()+"...")
             /* if(fromAdress.indexOf(",") > -1)
@@ -1000,7 +1005,7 @@ class EmailSendActivity : BaseActivity(), EmailSendContract.View, View.OnClickLi
         avatar_info.setText(myname.trim())
         var aa = "";
         if (foward == 0) {
-            var fromAdressList = emailMessageEntity!!.from.split(",")
+            var fromAdressList = emailMessageEntity!!.from_.split(",")
             for (item in fromAdressList) {
                 if (item != "") {
                     var fromNameTemp = ""
@@ -1009,8 +1014,12 @@ class EmailSendActivity : BaseActivity(), EmailSendContract.View, View.OnClickLi
                         fromNameTemp = item.substring(0, item.indexOf("<"))
                         fromAdressTemp = item.substring(item.indexOf("<") + 1, item.length - 1)
                     } else {
-                        fromNameTemp = item.substring(0, item.indexOf("@"))
-                        fromAdressTemp = item.substring(0, item.length)
+                        try {
+                            fromNameTemp = item.substring(0, item.indexOf("@"))
+                            fromAdressTemp = item.substring(0, item.length)
+                        } catch (e : Exception) {
+                            e.printStackTrace()
+                        }
                     }
                     fromNameTemp = fromNameTemp.replace("\"", "")
                     fromNameTemp = fromNameTemp.replace("\"", "")
@@ -1027,11 +1036,11 @@ class EmailSendActivity : BaseActivity(), EmailSendContract.View, View.OnClickLi
             })
             if (replayAll) {
                 //回复收件人
-                var fromAdressList = emailMessageEntity!!.to.split(",")
+                var fromAdressList = emailMessageEntity!!.to_.split(",")
 
 
                 //回复发件人
-                var toAddressList = emailMessageEntity!!.from.split(",")[0]
+                var toAddressList = emailMessageEntity!!.from_.split(",")[0]
 
                 var fromNameTemp = ""
                 var fromAdressTemp = ""
@@ -1112,7 +1121,7 @@ class EmailSendActivity : BaseActivity(), EmailSendContract.View, View.OnClickLi
 
         }
         if (foward == 3) {
-            var fromAdressList = emailMessageEntity!!.to.split(",")
+            var fromAdressList = emailMessageEntity!!.to_.split(",")
             for (item in fromAdressList) {
                 if (item != "") {
                     var fromNameTemp = ""
@@ -1344,7 +1353,7 @@ class EmailSendActivity : BaseActivity(), EmailSendContract.View, View.OnClickLi
         if (attachCount) {
             val save_dir = PathUtils.getInstance().filePath.toString() + "/"
             var addMenu = false
-            var attachListData = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeInfoData!!.menu + "_" + emailMeaasgeInfoData!!.msgId)).list()
+            var attachListData = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeInfoData!!.menu_ + "_" + emailMeaasgeInfoData!!.msgId)).list()
             if (attachListData.size == 0) {
                 addMenu = true
                 attachListData = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeInfoData!!.msgId)).list()
@@ -1357,7 +1366,7 @@ class EmailSendActivity : BaseActivity(), EmailSendContract.View, View.OnClickLi
                     for (attach in attachListData) {
                         var file = File(save_dir + attach.account + "_" + attach.msgId + "_" + attach.name)
                         if (addMenu) {
-                            file = File(save_dir + attach.account + "_" + emailMeaasgeInfoData!!.menu + "_" + attach.msgId + "_" + attach.name)
+                            file = File(save_dir + attach.account + "_" + emailMeaasgeInfoData!!.menu_ + "_" + attach.msgId + "_" + attach.name)
                         }
                         if (!file.exists()) {
                             isDownload = false
@@ -1405,7 +1414,7 @@ class EmailSendActivity : BaseActivity(), EmailSendContract.View, View.OnClickLi
 
                                             var iFlag = 0;
                                             for (attachItem in messageList) {
-                                                var attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeInfoData!!.menu + "_" + emailMeaasgeInfoData!!.msgId), EmailAttachEntityDao.Properties.Name.eq(attachItem.name)).list()
+                                                var attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeInfoData!!.menu_ + "_" + emailMeaasgeInfoData!!.msgId), EmailAttachEntityDao.Properties.Name.eq(attachItem.name)).list()
                                                 if (attachListTemp.size == 0) {
                                                     attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeInfoData!!.msgId)).list()
 
@@ -1413,7 +1422,7 @@ class EmailSendActivity : BaseActivity(), EmailSendContract.View, View.OnClickLi
                                                 if (attachListTemp == null || attachListTemp.size == 0) {
                                                     var eamilAttach = EmailAttachEntity()
                                                     eamilAttach.account = AppConfig.instance.emailConfig().account
-                                                    eamilAttach.msgId = emailMeaasgeInfoData!!.menu + "_" + emailMeaasgeInfoData!!.msgId
+                                                    eamilAttach.msgId = emailMeaasgeInfoData!!.menu_ + "_" + emailMeaasgeInfoData!!.msgId
                                                     eamilAttach.name = attachItem.name
                                                     eamilAttach.data = attachItem.byt
                                                     eamilAttach.hasData = true
@@ -1445,7 +1454,7 @@ class EmailSendActivity : BaseActivity(), EmailSendContract.View, View.OnClickLi
                                                 }
                                             }
 
-                                            attachListData = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeInfoData!!.menu + "_" + emailMeaasgeInfoData!!.msgId)).list()
+                                            attachListData = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeInfoData!!.menu_ + "_" + emailMeaasgeInfoData!!.msgId)).list()
                                             if (attachListData.size == 0) {
                                                 attachListData = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeInfoData!!.msgId)).list()
 
@@ -1476,7 +1485,7 @@ class EmailSendActivity : BaseActivity(), EmailSendContract.View, View.OnClickLi
 
                                             var iFlag = 0;
                                             for (attachItem in messageList) {
-                                                var attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeInfoData!!.menu + "_" + emailMeaasgeInfoData!!.msgId), EmailAttachEntityDao.Properties.Name.eq(attachItem.name)).list()
+                                                var attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeInfoData!!.menu_ + "_" + emailMeaasgeInfoData!!.msgId), EmailAttachEntityDao.Properties.Name.eq(attachItem.name)).list()
                                                 if (attachListTemp.size == 0) {
                                                     attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeInfoData!!.msgId)).list()
 
@@ -1484,7 +1493,7 @@ class EmailSendActivity : BaseActivity(), EmailSendContract.View, View.OnClickLi
                                                 if (attachListTemp == null || attachListTemp.size == 0) {
                                                     var eamilAttach = EmailAttachEntity()
                                                     eamilAttach.account = AppConfig.instance.emailConfig().account
-                                                    eamilAttach.msgId = emailMeaasgeInfoData!!.menu + "_" + emailMeaasgeInfoData!!.msgId
+                                                    eamilAttach.msgId = emailMeaasgeInfoData!!.menu_ + "_" + emailMeaasgeInfoData!!.msgId
                                                     eamilAttach.name = attachItem.name
                                                     eamilAttach.data = attachItem.byt
                                                     eamilAttach.hasData = true
@@ -1516,7 +1525,7 @@ class EmailSendActivity : BaseActivity(), EmailSendContract.View, View.OnClickLi
                                                 }
                                             }
 
-                                            attachListData = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeInfoData!!.menu + "_" + emailMeaasgeInfoData!!.msgId)).list()
+                                            attachListData = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeInfoData!!.menu_ + "_" + emailMeaasgeInfoData!!.msgId)).list()
                                             if (attachListData.size == 0) {
                                                 attachListData = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeInfoData!!.msgId)).list()
 
@@ -1539,7 +1548,7 @@ class EmailSendActivity : BaseActivity(), EmailSendContract.View, View.OnClickLi
                     }
 
                 } else {
-                    attachListData = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeInfoData!!.menu + "_" + emailMeaasgeInfoData!!.msgId)).list()
+                    attachListData = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeInfoData!!.menu_ + "_" + emailMeaasgeInfoData!!.msgId)).list()
                     if (attachListData.size == 0) {
                         attachListData = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeInfoData!!.msgId)).list()
 
@@ -1750,6 +1759,9 @@ class EmailSendActivity : BaseActivity(), EmailSendContract.View, View.OnClickLi
             lockTips.visibility = View.GONE
             return
         }
+        if (this.flag == 100) {
+            FireBaseUtils.logEvent(this, FireBaseUtils.FIR_INVATE_FRIEND)
+        }
         if (isSendCheck) {
             runOnUiThread {
                 showProgressDialog(getString(R.string.waiting))
@@ -1783,8 +1795,8 @@ class EmailSendActivity : BaseActivity(), EmailSendContract.View, View.OnClickLi
         }
         var contentHtml = re_main_editor.html
         if (flag == 1 && emailMeaasgeInfoData != null && emailMeaasgeInfoData!!.content != null) {
-            var from = emailMeaasgeInfoData!!.from
-            var toStr = emailMeaasgeInfoData!!.to
+            var from = emailMeaasgeInfoData!!.from_
+            var toStr = emailMeaasgeInfoData!!.to_
             var centerStr = " <br />" +
                     " <br />" +
                     " <br />" +
@@ -1792,8 +1804,8 @@ class EmailSendActivity : BaseActivity(), EmailSendContract.View, View.OnClickLi
                     getString(R.string.Original_mail) +
                     "   <br />" + getString(R.string.From) + "：&quot;" + from + "&quot;" +
                     "   <br />" + getString(R.string.To) + "：&quot;" + toStr + "&quot;" +
-                    "   <br />" + getString(R.string.Subject) + "：&quot;" + emailMeaasgeInfoData!!.subject + "&quot;" +
-                    "   <br />" + getString(R.string.Date) + "：" + emailMeaasgeInfoData!!.date +
+                    "   <br />" + getString(R.string.Subject) + "：&quot;" + emailMeaasgeInfoData!!.subject_ + "&quot;" +
+                    "   <br />" + getString(R.string.Date) + "：" + emailMeaasgeInfoData!!.date_ +
                     "  </div>" +
                     "   <br />" +
                     "   <br />";
@@ -1827,13 +1839,13 @@ class EmailSendActivity : BaseActivity(), EmailSendContract.View, View.OnClickLi
         var cidList = ""
         var uuid = (System.currentTimeMillis() / 1000).toString()
         if (emailMeaasgeInfoData != null) {
-            var citList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeInfoData!!.menu + "_" + emailMeaasgeInfoData!!.msgId)).list()
+            var citList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeInfoData!!.menu_ + "_" + emailMeaasgeInfoData!!.msgId)).list()
             if (citList.size == 0) {
                 citList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeInfoData!!.msgId)).list()
             }
             for (item in citList) {
                 val save_dir = PathUtils.getInstance().filePath.toString() + "/"
-                var savePath = save_dir + AppConfig.instance.emailConfig().account + "_" + emailMeaasgeInfoData!!.menu + "_" + emailMeaasgeInfoData!!.msgId + "_" + item.name
+                var savePath = save_dir + AppConfig.instance.emailConfig().account + "_" + emailMeaasgeInfoData!!.menu_ + "_" + emailMeaasgeInfoData!!.msgId + "_" + item.name
                 if (!contentHtml.equals("")) {
                     contentHtml = replaceImgCidByLocalPath(contentHtml, item.cid, savePath, uuid)
                 }
@@ -2083,9 +2095,9 @@ class EmailSendActivity : BaseActivity(), EmailSendContract.View, View.OnClickLi
                     "     <p>Encrypted email client and beyond - your comprehensive privacy&nbsp;protection tool</p> " +
                     "    </div> " +
                     "    <div class=\"rowDiv\" style=\"border: 0;\"> " +
-                    "     <p style=\"font-size: 14px;\">You have received a secure message from</p> " +
+                    "     <p style=\"font-size: 14px;\">You just received a secure message from</p> " +
                     "     <h3 style=\"color:#6646F7\">" + myAccount + "</h3> " +
-                    "     <p>I’m using Confidant to send and receive secure emails.&nbsp;Click the&nbsp;link below to decrypt and view&nbsp;my&nbsp;message.</p> " +
+                    "     <p>I’m using Confidant to send and receive secure emails. Download and install Confidant to decrypt and read the email content via the link below.</p> " +
                     "    </div>" +
                     "    <div class=\"rowDiv jusCenter\" style=\"text-align: center;padding: 0;\">" +
                     "     <div style=\"padding:15px;\">" +

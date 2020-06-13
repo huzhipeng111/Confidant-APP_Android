@@ -7,9 +7,7 @@ import android.net.Uri
 import android.net.http.SslError
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.os.Handler
-import android.support.v4.content.ContextCompat
 import android.support.v7.widget.GridLayoutManager
 import android.text.TextUtils
 import android.text.method.HideReturnsTransformationMethod
@@ -18,7 +16,6 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.WindowManager
 import android.webkit.*
 import android.widget.*
@@ -62,7 +59,6 @@ import com.stratagile.pnrouter.ui.activity.email.component.DaggerEmailInfoCompon
 import com.stratagile.pnrouter.ui.activity.email.contract.EmailInfoContract
 import com.stratagile.pnrouter.ui.activity.email.module.EmailInfoModule
 import com.stratagile.pnrouter.ui.activity.email.presenter.EmailInfoPresenter
-import com.stratagile.pnrouter.ui.activity.main.LogActivity
 import com.stratagile.pnrouter.ui.adapter.conversation.EmaiAttachAdapter
 import com.stratagile.pnrouter.ui.adapter.conversation.EmaiInfoAdapter
 import com.stratagile.pnrouter.utils.*
@@ -221,27 +217,28 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
             AppConfig.instance.messageReceiver!!.bakMailsCheckCallback = this
             AppConfig.instance.messageReceiver!!.dlEmailCallback = this
             initPicPlug()
-            emailMeaasgeData = intent.getParcelableExtra("emailMeaasgeData")
+//            emailMeaasgeData = intent.getParcelableExtra("emailMeaasgeData")
+            emailMeaasgeData = AppConfig.instance.emailInfoMessageEntity!!
             if (emailMeaasgeData!!.content == null) {
                 showProgressDialog()
-                inboxTitle.text = emailMeaasgeData!!.subject
+                inboxTitle.text = emailMeaasgeData!!.subject_
                 var fromName = ""
                 var fromAdress = ""
-                if (emailMeaasgeData!!.from.indexOf("<") > -1) {
-                    fromName = emailMeaasgeData!!.from.substring(0, emailMeaasgeData!!.from.indexOf("<"))
-                    fromAdress = emailMeaasgeData!!.from.substring(emailMeaasgeData!!.from.indexOf("<"), emailMeaasgeData!!.from.length)
+                if (emailMeaasgeData!!.from_.indexOf("<") > -1) {
+                    fromName = emailMeaasgeData!!.from_.substring(0, emailMeaasgeData!!.from_.indexOf("<"))
+                    fromAdress = emailMeaasgeData!!.from_.substring(emailMeaasgeData!!.from_.indexOf("<"), emailMeaasgeData!!.from_.length)
                 } else {
-                    var itemEndIndex = emailMeaasgeData!!.from.indexOf("@")
+                    var itemEndIndex = emailMeaasgeData!!.from_.indexOf("@")
                     if (itemEndIndex < 0) {
                         itemEndIndex = 0;
                     }
-                    fromName = emailMeaasgeData!!.from.substring(0, itemEndIndex)
-                    fromAdress = emailMeaasgeData!!.from.substring(0, emailMeaasgeData!!.from.length)
+                    fromName = emailMeaasgeData!!.from_.substring(0, itemEndIndex)
+                    fromAdress = emailMeaasgeData!!.from_.substring(0, emailMeaasgeData!!.from_.length)
                 }
                 var toName = ""
                 var toAdress = ""
-                if (emailMeaasgeData!!.to.contains(",")) {
-                    var toList = emailMeaasgeData!!.to.split(",")
+                if (emailMeaasgeData!!.to_.contains(",")) {
+                    var toList = emailMeaasgeData!!.to_.split(",")
                     for (item in toList) {
                         if (item.indexOf("<") > -1) {
                             toName += item.substring(0, item.indexOf("<")) + ","
@@ -262,25 +259,25 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                         toAdress.substring(0, toAdress.length - 1)
                     }
                 } else {
-                    if (emailMeaasgeData!!.to.indexOf("<") > -1) {
-                        toName = emailMeaasgeData!!.to.substring(0, emailMeaasgeData!!.to.indexOf("<"))
-                        toAdress = emailMeaasgeData!!.to.substring(emailMeaasgeData!!.to.indexOf("<"), emailMeaasgeData!!.to.length)
+                    if (emailMeaasgeData!!.to_.indexOf("<") > -1) {
+                        toName = emailMeaasgeData!!.to_.substring(0, emailMeaasgeData!!.to_.indexOf("<"))
+                        toAdress = emailMeaasgeData!!.to_.substring(emailMeaasgeData!!.to_.indexOf("<"), emailMeaasgeData!!.to_.length)
                     } else {
-                        var itemEndIndex = emailMeaasgeData!!.to.indexOf("@")
+                        var itemEndIndex = emailMeaasgeData!!.to_.indexOf("@")
                         if (itemEndIndex < 0) {
                             itemEndIndex = 0;
                         }
-                        toName = emailMeaasgeData!!.to.substring(0, itemEndIndex)
-                        toAdress = emailMeaasgeData!!.to.substring(0, emailMeaasgeData!!.to.length)
+                        toName = emailMeaasgeData!!.to_.substring(0, itemEndIndex)
+                        toAdress = emailMeaasgeData!!.to_.substring(0, emailMeaasgeData!!.to_.length)
                     }
                 }
 
                 title_info.text = fromName
                 avatar_info.setText(fromName)
-                time_info.text = DateUtil.getTimestampString(DateUtil.getDate(emailMeaasgeData!!.date), AppConfig.instance)
+                time_info.text = DateUtil.getTimestampString(DateUtil.getDate(emailMeaasgeData!!.date_), AppConfig.instance)
                 KLog.i(emailMeaasgeData!!.content)
-                mailInfo.revDate = (DateUtil.getDate(emailMeaasgeData!!.date).time / 1000).toInt()
-                fromName_Time.text = emailMeaasgeData!!.date
+                mailInfo.revDate = (DateUtil.getDate(emailMeaasgeData!!.date_).time / 1000).toInt()
+                fromName_Time.text = emailMeaasgeData!!.date_
                 return
             }
         }
@@ -313,16 +310,16 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                             var flag = 0;
                                             var localEmailMessageNew = mutableListOf<EmailMessageEntity>()
                                             for (item in messageList) {
-                                                var localEmailMessage = AppConfig.instance.mDaoMaster!!.newSession().emailMessageEntityDao.queryBuilder().where(EmailMessageEntityDao.Properties.Account.eq(account), EmailMessageEntityDao.Properties.Menu.eq(menu), EmailMessageEntityDao.Properties.MsgId.eq(item.id)).list()
+                                                var localEmailMessage = AppConfig.instance.mDaoMaster!!.newSession().emailMessageEntityDao.queryBuilder().where(EmailMessageEntityDao.Properties.Account_.eq(account), EmailMessageEntityDao.Properties.Menu_.eq(menu), EmailMessageEntityDao.Properties.MsgId.eq(item.id)).list()
                                                 var name = ""
                                                 var account = ""
                                                 if (localEmailMessage != null && localEmailMessage!!.size != 0) {
                                                     var eamilMessage = localEmailMessage.get(0)
-                                                    eamilMessage.account = AppConfig.instance.emailConfig().account
+                                                    eamilMessage.account_ = AppConfig.instance.emailConfig().account
                                                     eamilMessage.msgId = item.id
-                                                    eamilMessage.menu = menuFlag
-                                                    eamilMessage.from = item.from
-                                                    eamilMessage.to = item.to
+                                                    eamilMessage.menu_ = menuFlag
+                                                    eamilMessage.from_ = item.from
+                                                    eamilMessage.to_ = item.to
                                                     eamilMessage.cc = item.cc
                                                     eamilMessage.bcc = item.bcc
                                                     eamilMessage.setIsContainerAttachment(item.isContainerAttachment)
@@ -334,7 +331,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                     eamilMessage.setIsStar(item.isStar)
                                                     eamilMessage.setIsReplySign(item.isReplySign)
                                                     eamilMessage.setAttachmentCount(item.attachmentCount)
-                                                    eamilMessage.subject = item.subject
+                                                    eamilMessage.subject_ = item.subject
                                                     println("time_" + "imapStoreBeginHelp:" + item.subject + menuFlag + "##" + System.currentTimeMillis())
                                                     eamilMessage.content = item.content
                                                     eamilMessage.contentText = item.contentText
@@ -342,17 +339,17 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                     eamilMessage.originalText = originMap.get("originalText")
                                                     eamilMessage.aesKey = originMap.get("aesKey")
                                                     eamilMessage.userId = originMap.get("userId")
-                                                    eamilMessage.date = item.date
-                                                    eamilMessage.setTimeStamp(DateUtil.getDateTimeStame(item.date))
+                                                    eamilMessage.date_ = item.date
+                                                    eamilMessage.setTimeStamp_(DateUtil.getDateTimeStame(item.date))
                                                     eamilMessage.sortId = item.id.toLong();
                                                     localEmailMessageNew.add(flag, eamilMessage)
                                                     AppConfig.instance.mDaoMaster!!.newSession().emailMessageEntityDao.update(eamilMessage)
-                                                    if (eamilMessage.from.indexOf("<") >= 0) {
-                                                        name = eamilMessage.from.substring(0, eamilMessage.from.indexOf("<"))
-                                                        account = eamilMessage.from.substring(eamilMessage.from.indexOf("<") + 1, eamilMessage.from.length - 1)
+                                                    if (eamilMessage.from_.indexOf("<") >= 0) {
+                                                        name = eamilMessage.from_.substring(0, eamilMessage.from_.indexOf("<"))
+                                                        account = eamilMessage.from_.substring(eamilMessage.from_.indexOf("<") + 1, eamilMessage.from_.length - 1)
                                                     } else {
-                                                        name = eamilMessage.from.substring(0, eamilMessage.from.indexOf("@"))
-                                                        account = eamilMessage.from.substring(0, eamilMessage.from.length)
+                                                        name = eamilMessage.from_.substring(0, eamilMessage.from_.indexOf("@"))
+                                                        account = eamilMessage.from_.substring(0, eamilMessage.from_.length)
                                                     }
                                                     name = name.replace("\"", "")
                                                     name = name.replace("\"", "")
@@ -443,7 +440,8 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
         KLog.i(emailMeaasgeData!!.content)
         KLog.i(emailMeaasgeData!!.contentText)
         KLog.i(emailMeaasgeData!!.originalText)
-        KLog.i(emailMeaasgeData!!.subject)
+        KLog.i(emailMeaasgeData!!.subject_)
+        KLog.i(emailMeaasgeData!!.userId)
         if (emailMeaasgeData!!.content.contains("newconfidantpass") && !hasPassWord) {
 
             var miTxtEndAllIndex = emailMeaasgeData!!.content.indexOf("newconfidantpass")
@@ -491,9 +489,9 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                 backMenu.visibility = View.VISIBLE
             }
         }
-        zipSavePathTemp = emailMeaasgeData!!.account + "_" + menu + "_" + emailMeaasgeData!!.msgId
+        zipSavePathTemp = emailMeaasgeData!!.account_ + "_" + menu + "_" + emailMeaasgeData!!.msgId
         msgId = emailMeaasgeData!!.msgId
-        var to = emailMeaasgeData!!.to
+        var to = emailMeaasgeData!!.to_
         var cc = emailMeaasgeData!!.cc
         var bcc = emailMeaasgeData!!.bcc
 
@@ -508,7 +506,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                 }
             }
             mailInfo.attchCount = emailMeaasgeData!!.attachmentCount
-            mailInfo.subTitle = emailMeaasgeData!!.subject
+            mailInfo.subTitle = emailMeaasgeData!!.subject_
             emailConfigEntityChooseList = AppConfig.instance.mDaoMaster!!.newSession().emailConfigEntityDao.queryBuilder().where(EmailConfigEntityDao.Properties.IsChoose.eq(true)).list()
             if (emailConfigEntityChooseList.size > 0) {
                 emailConfigEntityChoose = emailConfigEntityChooseList.get(0)
@@ -538,9 +536,9 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                     }
                     val save_dir = PathUtils.getInstance().filePath.toString() + "/"
                     var addMenu = false
-                    var attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId)).list()
+                    var attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId)).list()
                     KLog.i("附件个数为：" + attachList.size)
-                    KLog.i(emailMeaasgeData!!.menu + "_" + msgId)
+                    KLog.i(emailMeaasgeData!!.menu_ + "_" + msgId)
                     if (attachList.size == 0) {
                         addMenu = true
                         attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(msgId)).list()
@@ -552,7 +550,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                         for (attach in attachList) {
                             var savePath = save_dir + attach.account + "_" + attach.msgId + "_" + attach.name
                             if (addMenu) {
-                                savePath = save_dir + attach.account + "_" + emailMeaasgeData!!.menu + "_" + attach.msgId + "_" + attach.name
+                                savePath = save_dir + attach.account + "_" + emailMeaasgeData!!.menu_ + "_" + attach.msgId + "_" + attach.name
                             }
                             var file = File(savePath)
                             if (!file.exists()) {
@@ -615,7 +613,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                 runOnUiThread {
                                                     var iFlag = 0;
                                                     for (attachItem in messageList) {
-                                                        var attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId), EmailAttachEntityDao.Properties.Name.eq(attachItem.name)).list()
+                                                        var attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId), EmailAttachEntityDao.Properties.Name.eq(attachItem.name)).list()
                                                         if (attachListTemp.size == 0) {
                                                             attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(msgId)).list()
 
@@ -623,7 +621,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                         if (attachListTemp == null || attachListTemp.size == 0) {
                                                             var eamilAttach = EmailAttachEntity()
                                                             eamilAttach.account = AppConfig.instance.emailConfig().account
-                                                            eamilAttach.msgId = emailMeaasgeData!!.menu + "_" + msgId
+                                                            eamilAttach.msgId = emailMeaasgeData!!.menu_ + "_" + msgId
                                                             eamilAttach.name = attachItem.name
                                                             eamilAttach.data = attachItem.byt
                                                             eamilAttach.hasData = true
@@ -654,7 +652,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                             iFlag++
                                                         }
                                                     }
-                                                    attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId)).list()
+                                                    attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId)).list()
                                                     if (attachList.size == 0) {
                                                         attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(msgId)).list()
 
@@ -705,7 +703,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                 runOnUiThread {
                                                     var iFlag = 0;
                                                     for (attachItem in messageList) {
-                                                        var attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId), EmailAttachEntityDao.Properties.Name.eq(attachItem.name)).list()
+                                                        var attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId), EmailAttachEntityDao.Properties.Name.eq(attachItem.name)).list()
                                                         if (attachListTemp.size == 0) {
                                                             attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(msgId)).list()
 
@@ -713,7 +711,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                         if (attachListTemp == null || attachListTemp.size == 0) {
                                                             var eamilAttach = EmailAttachEntity()
                                                             eamilAttach.account = AppConfig.instance.emailConfig().account
-                                                            eamilAttach.msgId = emailMeaasgeData!!.menu + "_" + msgId
+                                                            eamilAttach.msgId = emailMeaasgeData!!.menu_ + "_" + msgId
                                                             eamilAttach.name = attachItem.name
                                                             eamilAttach.data = attachItem.byt
                                                             eamilAttach.hasData = true
@@ -744,7 +742,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                             iFlag++
                                                         }
                                                     }
-                                                    attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId)).list()
+                                                    attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId)).list()
                                                     if (attachList.size == 0) {
                                                         attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(msgId)).list()
 
@@ -785,7 +783,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                             }
 
                         } else {
-                            attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId)).list()
+                            attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId)).list()
                             if (attachList.size == 0) {
                                 attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(msgId)).list()
                             }
@@ -819,7 +817,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                 if (isContainerCid && hasPassWord) {
                     val save_dir = PathUtils.getInstance().filePath.toString() + "/"
                     var addMenu = false
-                    var citList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId)).list()
+                    var citList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId)).list()
                     if (citList.size == 0) {
                         addMenu = true
                         citList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(msgId)).list()
@@ -829,7 +827,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                         for (attach in citList) {
                             var savePath = save_dir + attach.account + "_" + attach.msgId + "_" + attach.name
                             if (addMenu) {
-                                savePath = save_dir + attach.account + "_" + emailMeaasgeData!!.menu + "_" + attach.msgId + "_" + attach.name
+                                savePath = save_dir + attach.account + "_" + emailMeaasgeData!!.menu_ + "_" + attach.msgId + "_" + attach.name
                             }
                             var file = File(savePath)
                             if (!file.exists()) {
@@ -853,7 +851,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                             runOnUiThread {
                                                 var iFlag = 0;
                                                 for (attachItem in messageList) {
-                                                    var attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId), EmailCidEntityDao.Properties.Name.eq(attachItem.name)).list()
+                                                    var attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId), EmailCidEntityDao.Properties.Name.eq(attachItem.name)).list()
                                                     if (attachListTemp.size == 0) {
                                                         attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(msgId)).list()
 
@@ -861,7 +859,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                     if (attachListTemp == null || attachListTemp.size == 0) {
                                                         var eamilCid = EmailCidEntity()
                                                         eamilCid.account = AppConfig.instance.emailConfig().account
-                                                        eamilCid.msgId = emailMeaasgeData!!.menu + "_" + msgId
+                                                        eamilCid.msgId = emailMeaasgeData!!.menu_ + "_" + msgId
                                                         eamilCid.name = attachItem.name
                                                         eamilCid.cid = attachItem.cid
                                                         eamilCid.data = attachItem.byt
@@ -872,14 +870,14 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                         AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.insert(eamilCid)
                                                     }
                                                 }
-                                                var cidList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId)).list()
+                                                var cidList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId)).list()
                                                 if (cidList.size == 0) {
                                                     cidList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(msgId)).list()
 
                                                 }
                                                 for (cidItem in cidList) {
                                                     val save_dir = PathUtils.getInstance().filePath.toString() + "/"
-                                                    var savePath = save_dir + AppConfig.instance.emailConfig().account + "_" + emailMeaasgeData!!.menu + "_" + msgId + "_" + cidItem.name
+                                                    var savePath = save_dir + AppConfig.instance.emailConfig().account + "_" + emailMeaasgeData!!.menu_ + "_" + msgId + "_" + cidItem.name
                                                     if (cidItem.cid == null && cidItem.cid == "") {
                                                         cidItem.cid = cidItem.name
                                                     }
@@ -903,7 +901,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                         mailInfo.content = originalTextCun
                                                         URLText = "<html>" + headStr + emailMeaasgeData!!.originalText + "</body>" + iframeStr + "</html>";
                                                         contentHtml = URLText
-                                                        webView.loadDataWithBaseURL(null, URLText, "text/html", "utf-8", null);
+                                                        webView.loadDataWithBaseURL("about:blank", URLText, "text/html", "utf-8", null);
                                                     } else {
                                                         var contentText = emailMeaasgeData!!.contentText
                                                         if (contentText.length > 50) {
@@ -912,7 +910,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                         mailInfo.content = contentText
                                                         URLText = "<html>" + headStr + emailMeaasgeData!!.content + "</div></body>" + iframeStr + "</html>";
                                                         contentHtml = URLText
-                                                        webView.loadDataWithBaseURL(null, URLText, "text/html", "utf-8", null);
+                                                        webView.loadDataWithBaseURL("about:blank", URLText, "text/html", "utf-8", null);
                                                     }
                                                 }
                                             }
@@ -934,7 +932,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                             runOnUiThread {
                                                 var iFlag = 0;
                                                 for (attachItem in messageList) {
-                                                    var attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId), EmailCidEntityDao.Properties.Name.eq(attachItem.name)).list()
+                                                    var attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId), EmailCidEntityDao.Properties.Name.eq(attachItem.name)).list()
                                                     if (attachListTemp.size == 0) {
                                                         attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(msgId)).list()
 
@@ -942,7 +940,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                     if (attachListTemp == null || attachListTemp.size == 0) {
                                                         var eamilCid = EmailCidEntity()
                                                         eamilCid.account = AppConfig.instance.emailConfig().account
-                                                        eamilCid.msgId = emailMeaasgeData!!.menu + "_" + msgId
+                                                        eamilCid.msgId = emailMeaasgeData!!.menu_ + "_" + msgId
                                                         eamilCid.name = attachItem.name
                                                         eamilCid.cid = attachItem.cid
                                                         eamilCid.data = attachItem.byt
@@ -953,14 +951,14 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                         AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.insert(eamilCid)
                                                     }
                                                 }
-                                                var cidList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId)).list()
+                                                var cidList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId)).list()
                                                 if (cidList.size == 0) {
                                                     cidList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(msgId)).list()
 
                                                 }
                                                 for (cidItem in cidList) {
                                                     val save_dir = PathUtils.getInstance().filePath.toString() + "/"
-                                                    var savePath = save_dir + AppConfig.instance.emailConfig().account + "_" + emailMeaasgeData!!.menu + "_" + msgId + "_" + cidItem.name
+                                                    var savePath = save_dir + AppConfig.instance.emailConfig().account + "_" + emailMeaasgeData!!.menu_ + "_" + msgId + "_" + cidItem.name
                                                     if (cidItem.cid == null && cidItem.cid == "") {
                                                         cidItem.cid = cidItem.name
                                                     }
@@ -984,7 +982,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                         mailInfo.content = originalTextCun
                                                         URLText = "<html>" + headStr + emailMeaasgeData!!.originalText + "</body>" + iframeStr + "</html>";
                                                         contentHtml = URLText
-                                                        webView.loadDataWithBaseURL(null, URLText, "text/html", "utf-8", null);
+                                                        webView.loadDataWithBaseURL("about:blank", URLText, "text/html", "utf-8", null);
                                                     } else {
                                                         var contentText = emailMeaasgeData!!.contentText
                                                         if (contentText.length > 50) {
@@ -993,7 +991,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                         mailInfo.content = contentText
                                                         URLText = "<html>" + headStr + emailMeaasgeData!!.content + "</div></body>" + iframeStr + "</html>";
                                                         contentHtml = URLText
-                                                        webView.loadDataWithBaseURL(null, URLText, "text/html", "utf-8", null);
+                                                        webView.loadDataWithBaseURL("about:blank", URLText, "text/html", "utf-8", null);
                                                     }
                                                 }
                                             }
@@ -1008,13 +1006,13 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                         }
 
                     } else {
-                        var cidList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId)).list()
+                        var cidList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId)).list()
                         if (cidList.size == 0) {
                             cidList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(msgId)).list()
                         }
                         for (cidItem in cidList) {
                             val save_dir = PathUtils.getInstance().filePath.toString() + "/"
-                            var savePath = save_dir + AppConfig.instance.emailConfig().account + "_" + emailMeaasgeData!!.menu + "_" + msgId + "_" + cidItem.name
+                            var savePath = save_dir + AppConfig.instance.emailConfig().account + "_" + emailMeaasgeData!!.menu_ + "_" + msgId + "_" + cidItem.name
                             if (cidItem.cid == null && cidItem.cid == "") {
                                 cidItem.cid = cidItem.name
                             }
@@ -1116,24 +1114,24 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
         }
         attach_info.text = getString(R.string.details)
         details.visibility = View.GONE
-        inboxTitle.text = emailMeaasgeData!!.subject
+        inboxTitle.text = emailMeaasgeData!!.subject_
         var fromName = ""
         var fromAdress = ""
-        if (emailMeaasgeData!!.from.indexOf("<") > -1) {
-            fromName = emailMeaasgeData!!.from.substring(0, emailMeaasgeData!!.from.indexOf("<"))
-            fromAdress = emailMeaasgeData!!.from.substring(emailMeaasgeData!!.from.indexOf("<"), emailMeaasgeData!!.from.length)
+        if (emailMeaasgeData!!.from_.indexOf("<") > -1) {
+            fromName = emailMeaasgeData!!.from_.substring(0, emailMeaasgeData!!.from_.indexOf("<"))
+            fromAdress = emailMeaasgeData!!.from_.substring(emailMeaasgeData!!.from_.indexOf("<"), emailMeaasgeData!!.from_.length)
         } else {
-            var itemEndIndex = emailMeaasgeData!!.from.indexOf("@")
+            var itemEndIndex = emailMeaasgeData!!.from_.indexOf("@")
             if (itemEndIndex < 0) {
                 itemEndIndex = 0;
             }
-            fromName = emailMeaasgeData!!.from.substring(0, itemEndIndex)
-            fromAdress = emailMeaasgeData!!.from.substring(0, emailMeaasgeData!!.from.length)
+            fromName = emailMeaasgeData!!.from_.substring(0, itemEndIndex)
+            fromAdress = emailMeaasgeData!!.from_.substring(0, emailMeaasgeData!!.from_.length)
         }
         var toName = ""
         var toAdress = ""
-        if (emailMeaasgeData!!.to.contains(",")) {
-            var toList = emailMeaasgeData!!.to.split(",")
+        if (emailMeaasgeData!!.to_.contains(",")) {
+            var toList = emailMeaasgeData!!.to_.split(",")
             for (item in toList) {
                 if (item.indexOf("<") > -1) {
                     toName += item.substring(0, item.indexOf("<")) + ","
@@ -1154,25 +1152,25 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                 toAdress.substring(0, toAdress.length - 1)
             }
         } else {
-            if (emailMeaasgeData!!.to.indexOf("<") > -1) {
-                toName = emailMeaasgeData!!.to.substring(0, emailMeaasgeData!!.to.indexOf("<"))
-                toAdress = emailMeaasgeData!!.to.substring(emailMeaasgeData!!.to.indexOf("<"), emailMeaasgeData!!.to.length)
+            if (emailMeaasgeData!!.to_.indexOf("<") > -1) {
+                toName = emailMeaasgeData!!.to_.substring(0, emailMeaasgeData!!.to_.indexOf("<"))
+                toAdress = emailMeaasgeData!!.to_.substring(emailMeaasgeData!!.to_.indexOf("<"), emailMeaasgeData!!.to_.length)
             } else {
-                var itemEndIndex = emailMeaasgeData!!.to.indexOf("@")
+                var itemEndIndex = emailMeaasgeData!!.to_.indexOf("@")
                 if (itemEndIndex < 0) {
                     itemEndIndex = 0;
                 }
-                toName = emailMeaasgeData!!.to.substring(0, itemEndIndex)
-                toAdress = emailMeaasgeData!!.to.substring(0, emailMeaasgeData!!.to.length)
+                toName = emailMeaasgeData!!.to_.substring(0, itemEndIndex)
+                toAdress = emailMeaasgeData!!.to_.substring(0, emailMeaasgeData!!.to_.length)
             }
         }
 
         title_info.text = fromName
         avatar_info.setText(fromName)
-        time_info.text = DateUtil.getTimestampString(DateUtil.getDate(emailMeaasgeData!!.date), AppConfig.instance)
+        time_info.text = DateUtil.getTimestampString(DateUtil.getDate(emailMeaasgeData!!.date_), AppConfig.instance)
         KLog.i(emailMeaasgeData!!.content)
-        mailInfo.revDate = (DateUtil.getDate(emailMeaasgeData!!.date).time / 1000).toInt()
-        fromName_Time.text = emailMeaasgeData!!.date
+        mailInfo.revDate = (DateUtil.getDate(emailMeaasgeData!!.date_).time / 1000).toInt()
+        fromName_Time.text = emailMeaasgeData!!.date_
         attach_info.setOnClickListener {
             if (attach_info.text == getString(R.string.details)) {
                 attach_info.text = getString(R.string.Hide)
@@ -1213,7 +1211,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
              mNormalPopup!!.setPreferredDirection(QMUIPopup.DIRECTION_TOP)
              mNormalPopup!!.show(it)*/
         }
-        var menuFrom = emailMeaasgeData!!.menu
+        var menuFrom = emailMeaasgeData!!.menu_
         /*if(menuFrom.contains("Sent") || menuFrom.contains("已发") || menuFrom.contains("Drafts")|| menuFrom.contains("草稿"))
         {
             draft_info.text = getString(R.string.From_me)
@@ -1406,14 +1404,17 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
 
 
         }
+        //这个是回复，
         tvRefuse.setOnClickListener {
             var intent = Intent(this, EmailSendActivity::class.java)
             intent.putExtra("flag", 1)
             intent.putExtra("attach", 0)
             intent.putExtra("menu", menu)
-            intent.putExtra("emailMeaasgeInfoData", emailMeaasgeData)
+//            intent.putExtra("emailMeaasgeInfoData", emailMeaasgeData)
+            AppConfig.instance.emailSendoMessageEntity = emailMeaasgeData
             startActivity(intent)
         }
+        //这个是转发
         forWardbtn.setOnClickListener {
             if (emailMeaasgeData!!.isContainerAttachment()) {
                 showDialog()
@@ -1422,7 +1423,8 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                 intent.putExtra("flag", 1)
                 intent.putExtra("foward", 1)
                 intent.putExtra("menu", menu)
-                intent.putExtra("emailMeaasgeInfoData", emailMeaasgeData)
+                AppConfig.instance.emailSendoMessageEntity = emailMeaasgeData
+//                intent.putExtra("emailMeaasgeInfoData", emailMeaasgeData)
                 startActivity(intent)
             }
 
@@ -1445,6 +1447,24 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
         }
         if (menu != "node") {
             if (!emailMeaasgeData!!.isSeen()) {
+                //如果邮件还是未读状态，这里做已读处理。
+                KLog.i("邮件未读，处理已读")
+                if (!"".equals(emailMeaasgeData!!.userId)) {
+                    KLog.i(emailMeaasgeData!!.userId)
+                    var fromId = SpUtil.getString(this, ConstantValue.userId, "")!!
+                    var list = AppConfig.instance.mDaoMaster!!.newSession().friendEntityDao.queryBuilder().where(FriendEntityDao.Properties.FriendId.eq(emailMeaasgeData!!.userId), FriendEntityDao.Properties.FriendLocalStatus.eq(0)).list()
+                    if (list.size > 0) {
+                        KLog.i(list[0].toString())
+
+                        var miMsg = "I have read the email.\n《${emailMeaasgeData!!.subject_}》"
+                        var base64Msg = RxEncodeTool.base64Encode(miMsg)
+                        KLog.i(String(base64Msg))
+                        var msgData = SendMsgReqV3(fromId, emailMeaasgeData!!.userId, String(base64Msg), "","","","", 0x11)
+                        if (ConstantValue.isWebsocketConnected) {
+                            AppConfig.instance.getPNRouterServiceMessageSender().sendReadMsg(BaseData(msgData))
+                        }
+                    }
+                }
                 if (ConstantValue.currentEmailConfigEntity!!.userId == null || ConstantValue.currentEmailConfigEntity!!.userId == "") {
                     val emailReceiveClient = EmailReceiveClient(AppConfig.instance.emailConfig())
                     emailReceiveClient
@@ -1862,26 +1882,26 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
 //        }
 
 
-        webView.webChromeClient = object : WebChromeClient() {
-            override fun onReceivedTitle(view: WebView, title1: String?) {
-                super.onReceivedTitle(view, title1)
-                if (title1 != null) {
-                    //title.text = title1
-                }
-            }
-
-            override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                if (newProgress == 100) {
-                    progressBar.visibility = View.GONE
-                } else {
-                    KLog.i("进度：" + newProgress)
-                    progressBar.visibility = View.VISIBLE
-                    progressBar.progress = newProgress
-                }
-                super.onProgressChanged(view, newProgress)
-            }
-
-        }
+//        webView.webChromeClient = object : WebChromeClient() {
+//            override fun onReceivedTitle(view: WebView, title1: String?) {
+//                super.onReceivedTitle(view, title1)
+//                if (title1 != null) {
+//                    //title.text = title1
+//                }
+//            }
+//
+//            override fun onProgressChanged(view: WebView?, newProgress: Int) {
+//                if (newProgress == 100) {
+//                    progressBar.visibility = View.GONE
+//                } else {
+//                    KLog.i("进度：" + newProgress)
+//                    progressBar.visibility = View.VISIBLE
+//                    progressBar.progress = newProgress
+//                }
+//                super.onProgressChanged(view, newProgress)
+//            }
+//
+//        }
 //        webView.setOnTouchListener(object : View.OnTouchListener {
 //            override fun onTouch(v: View, event: MotionEvent): Boolean {
 //                when(event.action) {
@@ -1983,7 +2003,8 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                 mailInfo.content = originalTextCun
                 URLText = "<html>" + headStr + emailMeaasgeData!!.originalText + "</body>" + iframeStr + "</html>";
                 contentHtml = URLText
-                webView.loadDataWithBaseURL(null, URLText, "text/html", "utf-8", null);
+                KLog.i("加载网页")
+                webView.loadDataWithBaseURL("about:blank", URLText, "text/html", "utf-8", null);
             } else {
                 var contentText = emailMeaasgeData!!.contentText
                 if (contentText.length > 50) {
@@ -1994,7 +2015,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                 URLText = "<html>" + headStr + emailMeaasgeData!!.content + "</body>" + iframeStr + "</html>";
                 contentHtml = URLText
                 //contentHtml = StringUitl.addHrefToURL(contentHtml);
-                webView.loadDataWithBaseURL(null, URLText, "text/html", "utf-8", null);
+                webView.loadDataWithBaseURL("about:blank", URLText, "text/html", "utf-8", null);
             }
         }
 
@@ -2086,9 +2107,9 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                 backMenu.visibility = View.VISIBLE
             }
         }
-        zipSavePathTemp = emailMeaasgeData!!.account + "_" + menu + "_" + emailMeaasgeData!!.msgId
+        zipSavePathTemp = emailMeaasgeData!!.account_ + "_" + menu + "_" + emailMeaasgeData!!.msgId
         msgId = emailMeaasgeData!!.msgId
-        var to = emailMeaasgeData!!.to
+        var to = emailMeaasgeData!!.to_
         var cc = emailMeaasgeData!!.cc
         var bcc = emailMeaasgeData!!.bcc
         var isContainerAttachment = emailMeaasgeData!!.isContainerAttachment()
@@ -2101,7 +2122,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
             }
         }
         mailInfo.attchCount = emailMeaasgeData!!.attachmentCount
-        mailInfo.subTitle = emailMeaasgeData!!.subject
+        mailInfo.subTitle = emailMeaasgeData!!.subject_
         emailConfigEntityChooseList = AppConfig.instance.mDaoMaster!!.newSession().emailConfigEntityDao.queryBuilder().where(EmailConfigEntityDao.Properties.IsChoose.eq(true)).list()
         if (emailConfigEntityChooseList.size > 0) {
             emailConfigEntityChoose = emailConfigEntityChooseList.get(0)
@@ -2166,7 +2187,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                 }
                 val save_dir = PathUtils.getInstance().filePath.toString() + "/"
                 var addMenu = false
-                var attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId)).list()
+                var attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId)).list()
                 if (attachList.size == 0) {
                     addMenu = true
                     attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(msgId)).list()
@@ -2178,7 +2199,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                     for (attach in attachList) {
                         var savePath = save_dir + attach.account + "_" + attach.msgId + "_" + attach.name
                         if (addMenu) {
-                            savePath = save_dir + attach.account + "_" + emailMeaasgeData!!.menu + "_" + attach.msgId + "_" + attach.name
+                            savePath = save_dir + attach.account + "_" + emailMeaasgeData!!.menu_ + "_" + attach.msgId + "_" + attach.name
                         }
                         var file = File(savePath)
                         if (!file.exists()) {
@@ -2240,7 +2261,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                             runOnUiThread {
                                                 var iFlag = 0;
                                                 for (attachItem in messageList) {
-                                                    var attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId), EmailAttachEntityDao.Properties.Name.eq(attachItem.name)).list()
+                                                    var attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId), EmailAttachEntityDao.Properties.Name.eq(attachItem.name)).list()
                                                     if (attachListTemp.size == 0) {
                                                         attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(msgId)).list()
 
@@ -2248,7 +2269,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                     if (attachListTemp == null || attachListTemp.size == 0) {
                                                         var eamilAttach = EmailAttachEntity()
                                                         eamilAttach.account = AppConfig.instance.emailConfig().account
-                                                        eamilAttach.msgId = emailMeaasgeData!!.menu + "_" + msgId
+                                                        eamilAttach.msgId = emailMeaasgeData!!.menu_ + "_" + msgId
                                                         eamilAttach.name = attachItem.name
                                                         eamilAttach.data = attachItem.byt
                                                         eamilAttach.hasData = true
@@ -2279,7 +2300,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                         iFlag++
                                                     }
                                                 }
-                                                attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId)).list()
+                                                attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId)).list()
                                                 if (attachList.size == 0) {
                                                     attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(msgId)).list()
 
@@ -2330,7 +2351,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                             runOnUiThread {
                                                 var iFlag = 0;
                                                 for (attachItem in messageList) {
-                                                    var attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId), EmailAttachEntityDao.Properties.Name.eq(attachItem.name)).list()
+                                                    var attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId), EmailAttachEntityDao.Properties.Name.eq(attachItem.name)).list()
                                                     if (attachListTemp.size == 0) {
                                                         attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(msgId)).list()
 
@@ -2338,7 +2359,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                     if (attachListTemp == null || attachListTemp.size == 0) {
                                                         var eamilAttach = EmailAttachEntity()
                                                         eamilAttach.account = AppConfig.instance.emailConfig().account
-                                                        eamilAttach.msgId = emailMeaasgeData!!.menu + "_" + msgId
+                                                        eamilAttach.msgId = emailMeaasgeData!!.menu_ + "_" + msgId
                                                         eamilAttach.name = attachItem.name
                                                         eamilAttach.data = attachItem.byt
                                                         eamilAttach.hasData = true
@@ -2369,7 +2390,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                         iFlag++
                                                     }
                                                 }
-                                                attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId)).list()
+                                                attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId)).list()
                                                 if (attachList.size == 0) {
                                                     attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(msgId)).list()
 
@@ -2410,7 +2431,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                         }
 
                     } else {
-                        attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId)).list()
+                        attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId)).list()
                         if (attachList.size == 0) {
                             attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(msgId)).list()
                         }
@@ -2444,7 +2465,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
             if (isContainerCid && hasPassWord) {
                 val save_dir = PathUtils.getInstance().filePath.toString() + "/"
                 var addMenu = false
-                var citList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId)).list()
+                var citList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId)).list()
                 if (citList.size == 0) {
                     addMenu = true
                     citList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(msgId)).list()
@@ -2454,7 +2475,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                     for (attach in citList) {
                         var savePath = save_dir + attach.account + "_" + attach.msgId + "_" + attach.name
                         if (addMenu) {
-                            savePath = save_dir + attach.account + "_" + emailMeaasgeData!!.menu + "_" + attach.msgId + "_" + attach.name
+                            savePath = save_dir + attach.account + "_" + emailMeaasgeData!!.menu_ + "_" + attach.msgId + "_" + attach.name
                         }
                         var file = File(savePath)
                         if (!file.exists()) {
@@ -2478,7 +2499,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                         runOnUiThread {
                                             var iFlag = 0;
                                             for (attachItem in messageList) {
-                                                var attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId), EmailCidEntityDao.Properties.Name.eq(attachItem.name)).list()
+                                                var attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId), EmailCidEntityDao.Properties.Name.eq(attachItem.name)).list()
                                                 if (attachListTemp.size == 0) {
                                                     attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(msgId)).list()
 
@@ -2486,7 +2507,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                 if (attachListTemp == null || attachListTemp.size == 0) {
                                                     var eamilCid = EmailCidEntity()
                                                     eamilCid.account = AppConfig.instance.emailConfig().account
-                                                    eamilCid.msgId = emailMeaasgeData!!.menu + "_" + msgId
+                                                    eamilCid.msgId = emailMeaasgeData!!.menu_ + "_" + msgId
                                                     eamilCid.name = attachItem.name
                                                     eamilCid.cid = attachItem.cid
                                                     eamilCid.data = attachItem.byt
@@ -2497,14 +2518,14 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                     AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.insert(eamilCid)
                                                 }
                                             }
-                                            var cidList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId)).list()
+                                            var cidList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId)).list()
                                             if (cidList.size == 0) {
                                                 cidList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(msgId)).list()
 
                                             }
                                             for (cidItem in cidList) {
                                                 val save_dir = PathUtils.getInstance().filePath.toString() + "/"
-                                                var savePath = save_dir + AppConfig.instance.emailConfig().account + "_" + emailMeaasgeData!!.menu + "_" + msgId + "_" + cidItem.name
+                                                var savePath = save_dir + AppConfig.instance.emailConfig().account + "_" + emailMeaasgeData!!.menu_ + "_" + msgId + "_" + cidItem.name
                                                 if (cidItem.cid == null && cidItem.cid == "") {
                                                     cidItem.cid = cidItem.name
                                                 }
@@ -2528,7 +2549,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                     mailInfo.content = originalTextCun
                                                     URLText = "<html>" + headStr + emailMeaasgeData!!.originalText + "</body>" + iframeStr + "</html>";
                                                     contentHtml = URLText
-                                                    webView.loadDataWithBaseURL(null, URLText, "text/html", "utf-8", null);
+                                                    webView.loadDataWithBaseURL("about:blank", URLText, "text/html", "utf-8", null);
                                                 } else {
                                                     var contentText = emailMeaasgeData!!.contentText
                                                     if (contentText.length > 50) {
@@ -2537,7 +2558,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                     mailInfo.content = contentText
                                                     URLText = "<html>" + headStr + emailMeaasgeData!!.content + "</div></body>" + iframeStr + "</html>";
                                                     contentHtml = URLText
-                                                    webView.loadDataWithBaseURL(null, URLText, "text/html", "utf-8", null);
+                                                    webView.loadDataWithBaseURL("about:blank", URLText, "text/html", "utf-8", null);
                                                 }
                                             }
                                         }
@@ -2559,7 +2580,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                         runOnUiThread {
                                             var iFlag = 0;
                                             for (attachItem in messageList) {
-                                                var attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId), EmailCidEntityDao.Properties.Name.eq(attachItem.name)).list()
+                                                var attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId), EmailCidEntityDao.Properties.Name.eq(attachItem.name)).list()
                                                 if (attachListTemp.size == 0) {
                                                     attachListTemp = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(msgId)).list()
 
@@ -2567,7 +2588,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                 if (attachListTemp == null || attachListTemp.size == 0) {
                                                     var eamilCid = EmailCidEntity()
                                                     eamilCid.account = AppConfig.instance.emailConfig().account
-                                                    eamilCid.msgId = emailMeaasgeData!!.menu + "_" + msgId
+                                                    eamilCid.msgId = emailMeaasgeData!!.menu_ + "_" + msgId
                                                     eamilCid.name = attachItem.name
                                                     eamilCid.cid = attachItem.cid
                                                     eamilCid.data = attachItem.byt
@@ -2578,14 +2599,14 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                     AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.insert(eamilCid)
                                                 }
                                             }
-                                            var cidList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId)).list()
+                                            var cidList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId)).list()
                                             if (cidList.size == 0) {
                                                 cidList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(msgId)).list()
 
                                             }
                                             for (cidItem in cidList) {
                                                 val save_dir = PathUtils.getInstance().filePath.toString() + "/"
-                                                var savePath = save_dir + AppConfig.instance.emailConfig().account + "_" + emailMeaasgeData!!.menu + "_" + msgId + "_" + cidItem.name
+                                                var savePath = save_dir + AppConfig.instance.emailConfig().account + "_" + emailMeaasgeData!!.menu_ + "_" + msgId + "_" + cidItem.name
                                                 if (cidItem.cid == null && cidItem.cid == "") {
                                                     cidItem.cid = cidItem.name
                                                 }
@@ -2609,7 +2630,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                     mailInfo.content = originalTextCun
                                                     URLText = "<html>" + headStr + emailMeaasgeData!!.originalText + "</body>" + iframeStr + "</html>";
                                                     contentHtml = URLText
-                                                    webView.loadDataWithBaseURL(null, URLText, "text/html", "utf-8", null);
+                                                    webView.loadDataWithBaseURL("about:blank", URLText, "text/html", "utf-8", null);
                                                 } else {
                                                     var contentText = emailMeaasgeData!!.contentText
                                                     if (contentText.length > 50) {
@@ -2618,7 +2639,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                                                     mailInfo.content = contentText
                                                     URLText = "<html>" + headStr + emailMeaasgeData!!.content + "</div></body>" + iframeStr + "</html>";
                                                     contentHtml = URLText
-                                                    webView.loadDataWithBaseURL(null, URLText, "text/html", "utf-8", null);
+                                                    webView.loadDataWithBaseURL("about:blank", URLText, "text/html", "utf-8", null);
                                                 }
                                             }
                                         }
@@ -2633,13 +2654,13 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                     }
 
                 } else {
-                    var cidList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId)).list()
+                    var cidList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId)).list()
                     if (cidList.size == 0) {
                         cidList = AppConfig.instance.mDaoMaster!!.newSession().emailCidEntityDao.queryBuilder().where(EmailCidEntityDao.Properties.MsgId.eq(msgId)).list()
                     }
                     for (cidItem in cidList) {
                         val save_dir = PathUtils.getInstance().filePath.toString() + "/"
-                        var savePath = save_dir + AppConfig.instance.emailConfig().account + "_" + emailMeaasgeData!!.menu + "_" + msgId + "_" + cidItem.name
+                        var savePath = save_dir + AppConfig.instance.emailConfig().account + "_" + emailMeaasgeData!!.menu_ + "_" + msgId + "_" + cidItem.name
                         if (cidItem.cid == null && cidItem.cid == "") {
                             cidItem.cid = cidItem.name
                         }
@@ -2703,24 +2724,24 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
         }
         attach_info.text = getString(R.string.details)
         details.visibility = View.GONE
-        inboxTitle.text = emailMeaasgeData!!.subject
+        inboxTitle.text = emailMeaasgeData!!.subject_
         var fromName = ""
         var fromAdress = ""
-        if (emailMeaasgeData!!.from.indexOf("<") > -1) {
-            fromName = emailMeaasgeData!!.from.substring(0, emailMeaasgeData!!.from.indexOf("<"))
-            fromAdress = emailMeaasgeData!!.from.substring(emailMeaasgeData!!.from.indexOf("<"), emailMeaasgeData!!.from.length)
+        if (emailMeaasgeData!!.from_.indexOf("<") > -1) {
+            fromName = emailMeaasgeData!!.from_.substring(0, emailMeaasgeData!!.from_.indexOf("<"))
+            fromAdress = emailMeaasgeData!!.from_.substring(emailMeaasgeData!!.from_.indexOf("<"), emailMeaasgeData!!.from_.length)
         } else {
-            var itemEndIndex = emailMeaasgeData!!.from.indexOf("@")
+            var itemEndIndex = emailMeaasgeData!!.from_.indexOf("@")
             if (itemEndIndex < 0) {
                 itemEndIndex = 0;
             }
-            fromName = emailMeaasgeData!!.from.substring(0, itemEndIndex)
-            fromAdress = emailMeaasgeData!!.from.substring(0, emailMeaasgeData!!.from.length)
+            fromName = emailMeaasgeData!!.from_.substring(0, itemEndIndex)
+            fromAdress = emailMeaasgeData!!.from_.substring(0, emailMeaasgeData!!.from_.length)
         }
         var toName = ""
         var toAdress = ""
-        if (emailMeaasgeData!!.to.contains(",")) {
-            var toList = emailMeaasgeData!!.to.split(",")
+        if (emailMeaasgeData!!.to_.contains(",")) {
+            var toList = emailMeaasgeData!!.to_.split(",")
             for (item in toList) {
                 if (item.indexOf("<") > -1) {
                     toName += item.substring(0, item.indexOf("<")) + ","
@@ -2741,26 +2762,26 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                 toAdress.substring(0, toAdress.length - 1)
             }
         } else {
-            if (emailMeaasgeData!!.to.indexOf("<") > -1) {
-                toName = emailMeaasgeData!!.to.substring(0, emailMeaasgeData!!.to.indexOf("<"))
-                toAdress = emailMeaasgeData!!.to.substring(emailMeaasgeData!!.to.indexOf("<"), emailMeaasgeData!!.to.length)
+            if (emailMeaasgeData!!.to_.indexOf("<") > -1) {
+                toName = emailMeaasgeData!!.to_.substring(0, emailMeaasgeData!!.to_.indexOf("<"))
+                toAdress = emailMeaasgeData!!.to_.substring(emailMeaasgeData!!.to_.indexOf("<"), emailMeaasgeData!!.to_.length)
             } else {
-                var itemEndIndex = emailMeaasgeData!!.to.indexOf("@")
+                var itemEndIndex = emailMeaasgeData!!.to_.indexOf("@")
                 if (itemEndIndex < 0) {
                     itemEndIndex = 0;
                 }
-                toName = emailMeaasgeData!!.to.substring(0, itemEndIndex)
-                toAdress = emailMeaasgeData!!.to.substring(0, emailMeaasgeData!!.to.length)
+                toName = emailMeaasgeData!!.to_.substring(0, itemEndIndex)
+                toAdress = emailMeaasgeData!!.to_.substring(0, emailMeaasgeData!!.to_.length)
             }
         }
 
         title_info.text = fromName
         avatar_info.setText(fromName)
-        time_info.text = DateUtil.getTimestampString(DateUtil.getDate(emailMeaasgeData!!.date), AppConfig.instance)
-        mailInfo.revDate = (DateUtil.getDate(emailMeaasgeData!!.date).time / 1000).toInt()
-        fromName_Time.text = emailMeaasgeData!!.date
+        time_info.text = DateUtil.getTimestampString(DateUtil.getDate(emailMeaasgeData!!.date_), AppConfig.instance)
+        mailInfo.revDate = (DateUtil.getDate(emailMeaasgeData!!.date_).time / 1000).toInt()
+        fromName_Time.text = emailMeaasgeData!!.date_
 
-        var menuFrom = emailMeaasgeData!!.menu
+        var menuFrom = emailMeaasgeData!!.menu_
         draft_info.text = getString(R.string.To_me)
         detail_from_From.text = getString(R.string.From)
         fromName_From.text = fromName
@@ -3447,7 +3468,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                 mailInfo.content = originalTextCun
                 URLText = "<html>" + headStr + emailMeaasgeData!!.originalText + "</body>" + iframeStr + "</html>";
                 contentHtml = URLText
-                webView.loadDataWithBaseURL(null, URLText, "text/html", "utf-8", null);
+                webView.loadDataWithBaseURL("about:blank", URLText, "text/html", "utf-8", null);
             } else {
                 var contentText = emailMeaasgeData!!.contentText
                 if (contentText.length > 50) {
@@ -3458,7 +3479,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                 URLText = "<html>" + headStr + emailMeaasgeData!!.content + "</body>" + iframeStr + "</html>";
                 contentHtml = URLText
                 //contentHtml = StringUitl.addHrefToURL(contentHtml);
-                webView.loadDataWithBaseURL(null, URLText, "text/html", "utf-8", null);
+                webView.loadDataWithBaseURL("about:blank", URLText, "text/html", "utf-8", null);
             }
         }
     }
@@ -3483,7 +3504,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
             val code = FileUtil.copySdcardToxFileAndEncrypt(path, miPath, fileAESKey.substring(0, 16))
             zipFileSoucePath.add(miPath)
         }
-        var attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu + "_" + msgId)).list()
+        var attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(emailMeaasgeData!!.menu_ + "_" + msgId)).list()
         if (attachList.size == 0) {
             attachList = AppConfig.instance.mDaoMaster!!.newSession().emailAttachEntityDao.queryBuilder().where(EmailAttachEntityDao.Properties.MsgId.eq(msgId)).list()
 
@@ -3610,7 +3631,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
             var contentPathFile = File(contentPath)
             var contentHtml = FileUtil.readTxtFile(contentPathFile);
             emailMeaasgeData!!.content = contentHtml
-            webView.loadDataWithBaseURL(null, contentHtml, "text/html", "utf-8", null);
+            webView.loadDataWithBaseURL("about:blank", contentHtml, "text/html", "utf-8", null);
         }
         if (attachListEntity.size > 0) {
             attachListEntityNode = attachListEntity
@@ -3696,7 +3717,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
             var contentPathFile = File(contentPath)
             var contentHtml = FileUtil.readTxtFile(contentPathFile);
             emailMeaasgeData!!.content = contentHtml
-            webView.loadDataWithBaseURL(null, contentHtml, "text/html", "utf-8", null);
+            webView.loadDataWithBaseURL("about:blank", contentHtml, "text/html", "utf-8", null);
         }
         if (attachListEntity.size > 0) {
             attachListEntityNode = attachListEntity
@@ -4337,7 +4358,7 @@ class EmailInfoActivity : BaseActivity(), EmailInfoContract.View, PNRouterServic
                         endIndexd = beginIndex
                     }
                     var confidantkeyBefore = emailMeaasgeData!!.content.substring(beginIndex, endIndexd)
-
+                    KLog.i(confidantkeyBefore)
                     if (confidantkeyBefore.contains("newconfidantuserid")) {
                         var userIDBeginStr = "newconfidantuserid'"
                         userID = ""

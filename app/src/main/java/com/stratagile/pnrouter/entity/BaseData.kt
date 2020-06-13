@@ -284,7 +284,7 @@ data class SendMsgReq(var FromId :String ,var ToId :String, var Msg : String, va
  * 场景：用户A向自己的好友用户B发送消息，A发送消息到router
  * (1)	请求（APP-->Router）
  */
-data class SendMsgReqV3(var From :String ,var To:String, var Msg : String, var Sign : String, var Nonce : String, var PriKey: String,var AssocId:String,var Action : String = "SendMsg")
+data class SendMsgReqV3(var From :String ,var To:String, var Msg : String, var Sign : String, var Nonce : String, var PriKey: String,var AssocId:String, var MsgType : Int = 0, var Action : String = "SendMsg")
 
 /**
  * 11.	发送消息
@@ -851,3 +851,13 @@ data class GetBakContentStatReq(var Type : Int,var UserId : String,var Action : 
  * (1)	请求（APP-->Router）
  */
 data class DelBakContentReq(var Type : String,var UserId : String, var Num :Int,var Index : String,var Action : String = "DelBakContent")
+
+/**
+ * 108.	用户获取当前绑定钱包信息
+ */
+data class GetWalletAccountReq(var UserId : String, var WalletType : Int, var Action : String = "GetWalletAccount")
+
+/**
+ * 107.	用户绑定钱包地址
+ */
+data class SetWalletAccountReq(var UserId : String, var WalletType : String, var Address : String, var Action : String = "SetWalletAccount")

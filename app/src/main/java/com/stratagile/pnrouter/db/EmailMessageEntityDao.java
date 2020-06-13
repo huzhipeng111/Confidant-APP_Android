@@ -23,16 +23,16 @@ public class EmailMessageEntityDao extends AbstractDao<EmailMessageEntity, Long>
      */
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
-        public final static Property Account = new Property(1, String.class, "account", false, "ACCOUNT");
+        public final static Property Account_ = new Property(1, String.class, "account_", false, "ACCOUNT_");
         public final static Property MsgId = new Property(2, String.class, "msgId", false, "MSG_ID");
-        public final static Property Menu = new Property(3, String.class, "menu", false, "MENU");
-        public final static Property Subject = new Property(4, String.class, "subject", false, "SUBJECT");
-        public final static Property From = new Property(5, String.class, "from", false, "FROM");
-        public final static Property To = new Property(6, String.class, "to", false, "TO");
+        public final static Property Menu_ = new Property(3, String.class, "menu_", false, "MENU_");
+        public final static Property Subject_ = new Property(4, String.class, "subject_", false, "SUBJECT_");
+        public final static Property From_ = new Property(5, String.class, "from_", false, "FROM_");
+        public final static Property To_ = new Property(6, String.class, "to_", false, "TO_");
         public final static Property Cc = new Property(7, String.class, "cc", false, "CC");
         public final static Property Bcc = new Property(8, String.class, "bcc", false, "BCC");
-        public final static Property Date = new Property(9, String.class, "date", false, "DATE");
-        public final static Property TimeStamp = new Property(10, Long.class, "timeStamp", false, "TIME_STAMP");
+        public final static Property Date_ = new Property(9, String.class, "date_", false, "DATE_");
+        public final static Property TimeStamp_ = new Property(10, Long.class, "timeStamp_", false, "TIME_STAMP_");
         public final static Property IsSeen = new Property(11, boolean.class, "isSeen", false, "IS_SEEN");
         public final static Property IsStar = new Property(12, boolean.class, "isStar", false, "IS_STAR");
         public final static Property Priority = new Property(13, String.class, "priority", false, "PRIORITY");
@@ -65,16 +65,16 @@ public class EmailMessageEntityDao extends AbstractDao<EmailMessageEntity, Long>
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "\"EMAIL_MESSAGE_ENTITY\" (" + //
                 "\"_id\" INTEGER PRIMARY KEY AUTOINCREMENT ," + // 0: id
-                "\"ACCOUNT\" TEXT," + // 1: account
+                "\"ACCOUNT_\" TEXT," + // 1: account_
                 "\"MSG_ID\" TEXT," + // 2: msgId
-                "\"MENU\" TEXT," + // 3: menu
-                "\"SUBJECT\" TEXT," + // 4: subject
-                "\"FROM\" TEXT," + // 5: from
-                "\"TO\" TEXT," + // 6: to
+                "\"MENU_\" TEXT," + // 3: menu_
+                "\"SUBJECT_\" TEXT," + // 4: subject_
+                "\"FROM_\" TEXT," + // 5: from_
+                "\"TO_\" TEXT," + // 6: to_
                 "\"CC\" TEXT," + // 7: cc
                 "\"BCC\" TEXT," + // 8: bcc
-                "\"DATE\" TEXT," + // 9: date
-                "\"TIME_STAMP\" INTEGER," + // 10: timeStamp
+                "\"DATE_\" TEXT," + // 9: date_
+                "\"TIME_STAMP_\" INTEGER," + // 10: timeStamp_
                 "\"IS_SEEN\" INTEGER NOT NULL ," + // 11: isSeen
                 "\"IS_STAR\" INTEGER NOT NULL ," + // 12: isStar
                 "\"PRIORITY\" TEXT," + // 13: priority
@@ -108,9 +108,9 @@ public class EmailMessageEntityDao extends AbstractDao<EmailMessageEntity, Long>
             stmt.bindLong(1, id);
         }
  
-        String account = entity.getAccount();
-        if (account != null) {
-            stmt.bindString(2, account);
+        String account_ = entity.getAccount_();
+        if (account_ != null) {
+            stmt.bindString(2, account_);
         }
  
         String msgId = entity.getMsgId();
@@ -118,24 +118,24 @@ public class EmailMessageEntityDao extends AbstractDao<EmailMessageEntity, Long>
             stmt.bindString(3, msgId);
         }
  
-        String menu = entity.getMenu();
-        if (menu != null) {
-            stmt.bindString(4, menu);
+        String menu_ = entity.getMenu_();
+        if (menu_ != null) {
+            stmt.bindString(4, menu_);
         }
  
-        String subject = entity.getSubject();
-        if (subject != null) {
-            stmt.bindString(5, subject);
+        String subject_ = entity.getSubject_();
+        if (subject_ != null) {
+            stmt.bindString(5, subject_);
         }
  
-        String from = entity.getFrom();
-        if (from != null) {
-            stmt.bindString(6, from);
+        String from_ = entity.getFrom_();
+        if (from_ != null) {
+            stmt.bindString(6, from_);
         }
  
-        String to = entity.getTo();
-        if (to != null) {
-            stmt.bindString(7, to);
+        String to_ = entity.getTo_();
+        if (to_ != null) {
+            stmt.bindString(7, to_);
         }
  
         String cc = entity.getCc();
@@ -148,14 +148,14 @@ public class EmailMessageEntityDao extends AbstractDao<EmailMessageEntity, Long>
             stmt.bindString(9, bcc);
         }
  
-        String date = entity.getDate();
-        if (date != null) {
-            stmt.bindString(10, date);
+        String date_ = entity.getDate_();
+        if (date_ != null) {
+            stmt.bindString(10, date_);
         }
  
-        Long timeStamp = entity.getTimeStamp();
-        if (timeStamp != null) {
-            stmt.bindLong(11, timeStamp);
+        Long timeStamp_ = entity.getTimeStamp_();
+        if (timeStamp_ != null) {
+            stmt.bindLong(11, timeStamp_);
         }
         stmt.bindLong(12, entity.getIsSeen() ? 1L: 0L);
         stmt.bindLong(13, entity.getIsStar() ? 1L: 0L);
@@ -220,9 +220,9 @@ public class EmailMessageEntityDao extends AbstractDao<EmailMessageEntity, Long>
             stmt.bindLong(1, id);
         }
  
-        String account = entity.getAccount();
-        if (account != null) {
-            stmt.bindString(2, account);
+        String account_ = entity.getAccount_();
+        if (account_ != null) {
+            stmt.bindString(2, account_);
         }
  
         String msgId = entity.getMsgId();
@@ -230,24 +230,24 @@ public class EmailMessageEntityDao extends AbstractDao<EmailMessageEntity, Long>
             stmt.bindString(3, msgId);
         }
  
-        String menu = entity.getMenu();
-        if (menu != null) {
-            stmt.bindString(4, menu);
+        String menu_ = entity.getMenu_();
+        if (menu_ != null) {
+            stmt.bindString(4, menu_);
         }
  
-        String subject = entity.getSubject();
-        if (subject != null) {
-            stmt.bindString(5, subject);
+        String subject_ = entity.getSubject_();
+        if (subject_ != null) {
+            stmt.bindString(5, subject_);
         }
  
-        String from = entity.getFrom();
-        if (from != null) {
-            stmt.bindString(6, from);
+        String from_ = entity.getFrom_();
+        if (from_ != null) {
+            stmt.bindString(6, from_);
         }
  
-        String to = entity.getTo();
-        if (to != null) {
-            stmt.bindString(7, to);
+        String to_ = entity.getTo_();
+        if (to_ != null) {
+            stmt.bindString(7, to_);
         }
  
         String cc = entity.getCc();
@@ -260,14 +260,14 @@ public class EmailMessageEntityDao extends AbstractDao<EmailMessageEntity, Long>
             stmt.bindString(9, bcc);
         }
  
-        String date = entity.getDate();
-        if (date != null) {
-            stmt.bindString(10, date);
+        String date_ = entity.getDate_();
+        if (date_ != null) {
+            stmt.bindString(10, date_);
         }
  
-        Long timeStamp = entity.getTimeStamp();
-        if (timeStamp != null) {
-            stmt.bindLong(11, timeStamp);
+        Long timeStamp_ = entity.getTimeStamp_();
+        if (timeStamp_ != null) {
+            stmt.bindLong(11, timeStamp_);
         }
         stmt.bindLong(12, entity.getIsSeen() ? 1L: 0L);
         stmt.bindLong(13, entity.getIsStar() ? 1L: 0L);
@@ -332,16 +332,16 @@ public class EmailMessageEntityDao extends AbstractDao<EmailMessageEntity, Long>
     public EmailMessageEntity readEntity(Cursor cursor, int offset) {
         EmailMessageEntity entity = new EmailMessageEntity( //
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
-            cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // account
+            cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // account_
             cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // msgId
-            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // menu
-            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // subject
-            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // from
-            cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6), // to
+            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // menu_
+            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // subject_
+            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // from_
+            cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6), // to_
             cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // cc
             cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8), // bcc
-            cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9), // date
-            cursor.isNull(offset + 10) ? null : cursor.getLong(offset + 10), // timeStamp
+            cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9), // date_
+            cursor.isNull(offset + 10) ? null : cursor.getLong(offset + 10), // timeStamp_
             cursor.getShort(offset + 11) != 0, // isSeen
             cursor.getShort(offset + 12) != 0, // isStar
             cursor.isNull(offset + 13) ? null : cursor.getString(offset + 13), // priority
@@ -365,16 +365,16 @@ public class EmailMessageEntityDao extends AbstractDao<EmailMessageEntity, Long>
     @Override
     public void readEntity(Cursor cursor, EmailMessageEntity entity, int offset) {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
-        entity.setAccount(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
+        entity.setAccount_(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
         entity.setMsgId(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
-        entity.setMenu(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
-        entity.setSubject(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
-        entity.setFrom(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
-        entity.setTo(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
+        entity.setMenu_(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
+        entity.setSubject_(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
+        entity.setFrom_(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
+        entity.setTo_(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
         entity.setCc(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
         entity.setBcc(cursor.isNull(offset + 8) ? null : cursor.getString(offset + 8));
-        entity.setDate(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));
-        entity.setTimeStamp(cursor.isNull(offset + 10) ? null : cursor.getLong(offset + 10));
+        entity.setDate_(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));
+        entity.setTimeStamp_(cursor.isNull(offset + 10) ? null : cursor.getLong(offset + 10));
         entity.setIsSeen(cursor.getShort(offset + 11) != 0);
         entity.setIsStar(cursor.getShort(offset + 12) != 0);
         entity.setPriority(cursor.isNull(offset + 13) ? null : cursor.getString(offset + 13));

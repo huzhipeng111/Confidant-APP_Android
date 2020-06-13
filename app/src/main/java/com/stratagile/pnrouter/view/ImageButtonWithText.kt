@@ -170,7 +170,7 @@ class ImageButtonWithText(context: Context, attrs: AttributeSet) : RelativeLayou
             } else {
                 var options1 = RequestOptions()
                         .centerCrop()
-                        .transform(GlideCircleTransform())
+//                        .transform(GlideCircleTransform())
                         .diskCacheStrategy(DiskCacheStrategy.NONE)
                         .priority(Priority.HIGH)
                 Glide.with(context)

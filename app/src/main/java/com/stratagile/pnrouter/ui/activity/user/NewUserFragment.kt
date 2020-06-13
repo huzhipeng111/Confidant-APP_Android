@@ -30,6 +30,7 @@ import com.stratagile.pnrouter.db.UserEntity
 import com.stratagile.pnrouter.db.UserEntityDao
 import com.stratagile.pnrouter.entity.events.SetBadge
 import com.stratagile.pnrouter.ui.adapter.user.NewFriendListAdapter
+import com.stratagile.pnrouter.utils.FireBaseUtils
 import com.stratagile.pnrouter.utils.LogUtil
 import com.stratagile.pnrouter.utils.SpUtil
 import kotlinx.android.synthetic.main.layout_fragment_recyclerview.*
@@ -202,6 +203,7 @@ class NewUserFragment : BaseFragment(), NewUserContract.View, UserProvider.AddFr
 
 //                    AppConfig.instance.messageSender!!.send(BaseData(addFriendDealReq))
                             if (newFriendListAdapter!!.getItem(position)!!.signPublicKey != null) {
+                                FireBaseUtils.logEvent(activity, FireBaseUtils.FIR_AGREE_ADD)
                                 UserProvider.getInstance().accepteAddFriend(nickName!!, newFriendListAdapter!!.getItem(position)!!.nickName, userId!!, newFriendListAdapter!!.getItem(position)!!.userId, newFriendListAdapter!!.getItem(position)!!.signPublicKey)
                                 showProgressDialog()
                             }

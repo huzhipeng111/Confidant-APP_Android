@@ -12,12 +12,12 @@ public class BootReceiver extends BroadcastReceiver {
 
   @Override
   public void onReceive(Context context, Intent intent) {
-    Log.i("ppm", "收到了静态广播");
-    if (intent != null && Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
-      Log.i("","ppm 收到了手机启动完成的广播");
-      Intent messageRetrievalService = new Intent(context, BackGroundService.class);
-      context.startService(messageRetrievalService);
-    }
+//    Log.i("ppm", "收到了静态广播");
+//    if (intent != null && Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
+//      Log.i("","ppm 收到了手机启动完成的广播");
+//      Intent messageRetrievalService = new Intent(context, BackGroundService.class);
+//      context.startService(messageRetrievalService);
+//    }
   }
 
 }

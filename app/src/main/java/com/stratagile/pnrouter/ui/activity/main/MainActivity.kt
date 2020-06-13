@@ -82,6 +82,7 @@ import com.stratagile.pnrouter.application.AppConfig
 import com.stratagile.pnrouter.base.BaseActivity
 import com.stratagile.pnrouter.constant.ConstantValue
 import com.stratagile.pnrouter.constant.UserDataManger
+import com.stratagile.pnrouter.data.qualifier.Local
 import com.stratagile.pnrouter.data.service.BackGroundService
 import com.stratagile.pnrouter.data.service.FileDownloadUploadService
 import com.stratagile.pnrouter.data.service.FileTransformService
@@ -1589,93 +1590,6 @@ class MainActivity : BaseActivity(), MainContract.View, PNRouterServiceMessageRe
         bgmediaPlayer.setVolume(0.7f, 0.7f)
     }
 
-    fun defaultNotification() {
-        KLog.i("播放通知声音")
-        var mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        var builder: NotificationCompat.Builder? = null;
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-
-            var channel = NotificationChannel("通知渠道ID", "通知渠道名称", NotificationManager.IMPORTANCE_DEFAULT);
-
-            channel.enableLights(true); //设置开启指示灯，如果设备有的话
-
-            channel.setLightColor(Color.RED); //设置指示灯颜色
-
-            channel.setShowBadge(true); //设置是否显示角标
-
-            channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);//设置是否应在锁定屏幕上显示此频道的通知
-
-//            channel.setDescription("通知渠道描述");//设置渠道描述
-
-
-            channel.setBypassDnd(true);//设置是否绕过免打扰模式
-
-            mNotificationManager.createNotificationChannel(channel);
-
-//            createNotificationChannelGroups();
-//
-//            setNotificationChannelGroups(channel);
-
-            builder = NotificationCompat.Builder(this, "通知渠道ID");
-
-            builder.setBadgeIconType(BADGE_ICON_SMALL);//设置显示角标的样式
-
-            builder.setNumber(3);//设置显示角标的数量
-
-            builder.setTimeoutAfter(0);//设置通知被创建多长时间之后自动取消通知栏的通知。
-
-        } else {
-
-            builder = NotificationCompat.Builder(this);
-
-        }
-
-//setContentTitle 通知栏通知的标题
-
-//        builder.setContentTitle("内容标题");
-
-//setContentText 通知栏通知的详细内容
-
-//        builder.setContentText("内容文本信息");
-
-//setAutoCancel 点击通知的清除按钮是否清除该消息（true/false）
-
-        builder.setAutoCancel(true);
-
-//setLargeIcon 通知消息上的大图标
-
-        builder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-
-//setSmallIcon 通知上面的小图标
-
-        builder.setSmallIcon(R.mipmap.ic_launcher);//小图标
-
-//创建一个意图
-
-        var intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.baidu.com"));
-
-        var pIntent = PendingIntent.getActivity(this, 1, intent, 0);
-
-//setContentIntent 将意图设置到通知上
-
-        builder.setContentIntent(pIntent);
-
-//通知默认的声音 震动 呼吸灯
-
-        builder.setDefaults(NotificationCompat.DEFAULT_ALL);
-
-//构建通知
-
-        var notification = builder.build();
-
-//将构建好的通知添加到通知管理器中，执行通知
-
-        mNotificationManager.notify(0, notification);
-
-        ivQrCode.postDelayed({ mNotificationManager.cancel(0) }, 50)
-    }
-
     override fun pushGroupMsgRsp(pushMsgRsp: JGroupMsgPushRsp) {
         if (AppConfig.instance.isChatWithFirend != null && AppConfig.instance.isChatWithFirend.equals(pushMsgRsp.params.gId)) {
             KLog.i("已经在群聊天窗口了，不处理该条数据！")
@@ -1917,8 +1831,13 @@ class MainActivity : BaseActivity(), MainContract.View, PNRouterServiceMessageRe
                     friendEntity = localFriendList[0]
                 if (pushMsgRsp.getParams().getNonce().equals("================================") && pushMsgRsp.getParams().getSign().equals("================================")) {
                     msgSouce = String(RxEncodeTool.base64Decode(pushMsgRsp.getParams().getMsg()))
+                    KLog.i("base64解密之后：" + msgSouce)
                 } else {
-                    msgSouce = LibsodiumUtil.DecryptFriendMsg(pushMsgRsp.getParams().getMsg(), pushMsgRsp.getParams().getNonce(), pushMsgRsp.getParams().getFrom(), pushMsgRsp.getParams().getSign(), ConstantValue.libsodiumprivateMiKey!!, friendEntity.signPublicKey)
+                    if (pushMsgRsp.params.msgType == 0x11) {
+                        msgSouce = String(RxEncodeTool.base64Decode(pushMsgRsp.getParams().getMsg()))
+                    } else {
+                        msgSouce = LibsodiumUtil.DecryptFriendMsg(pushMsgRsp.getParams().getMsg(), pushMsgRsp.getParams().getNonce(), pushMsgRsp.getParams().getFrom(), pushMsgRsp.getParams().getSign(), ConstantValue.libsodiumprivateMiKey!!, friendEntity.signPublicKey)
+                    }
                 }
 
             } else {
@@ -2751,6 +2670,9 @@ class MainActivity : BaseActivity(), MainContract.View, PNRouterServiceMessageRe
 
             }
         }
+        if (AppConfig.instance.unreadMessage != null) {
+            hasUnReadMsgCount += AppConfig.instance.unreadMessage!!.unReadCount
+        }
         if (unread_count != null) {
             if (hasUnReadMsgCount <= 0) {
                 unread_count.visibility = View.INVISIBLE
@@ -2767,13 +2689,14 @@ class MainActivity : BaseActivity(), MainContract.View, PNRouterServiceMessageRe
     }
 
     private val LOCATION_CODE = 1
-    private val lm //【位置管理】
-            : LocationManager? = null
-    private var aa: String = ""
+    private val lm : LocationManager? = null
+    var countryCode = ""
+    var countryName = ""
     var geocoder //获取并解析位置用
             : Geocoder? = null
     private fun getLocation() {
         // 获取位置管理服务
+        geocoder = Geocoder(this, Locale.getDefault())
         val serviceName = Context.LOCATION_SERVICE
         val locationManager = this.getSystemService(serviceName) as LocationManager
         // 查找到服务信息
@@ -2797,25 +2720,30 @@ class MainActivity : BaseActivity(), MainContract.View, PNRouterServiceMessageRe
         }
         val location = locationManager.getLastKnownLocation(provider) // 通过GPS获取位置
         updateLocation(location)
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 1f, locationListener)
-    }
-
-    private val locationListener: LocationListener = object : LocationListener {
-        override fun onLocationChanged(location: Location) {}
-        override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
-        override fun onProviderEnabled(provider: String) {}
-        override fun onProviderDisabled(provider: String) {}
     }
 
     private fun updateLocation(location: Location?) {
         if (location != null) {
-            val latitude = location.latitude
-            val longitude = location.longitude
-            Toast.makeText(this, "经度" + latitude + "纬度" + longitude, Toast.LENGTH_SHORT).show()
-            aa = "经度" + latitude + "纬度" + longitude + "**" + aa
-            KLog.i(aa)
+           try{
+               val latitude = location.latitude
+               val longitude = location.longitude
+               var addressList = geocoder!!.getFromLocation(latitude, longitude, 1)
+               KLog.i("经度：" + latitude + "  纬度：" + longitude)
+               addressList.forEach {
+                   KLog.i(it.countryCode)
+                   KLog.i(it.countryName)
+                   if (it.countryCode != null) {
+                       countryCode = it.countryCode
+                   } else {
+                       countryCode = it.locale.country
+                   }
+                   KLog.i(countryCode)
+                   countryName = it.countryName
+               }
+           } catch (e :Exception) {
+               e.printStackTrace()
+           }
         } else {
-            Toast.makeText(this, "无法获取到位置信息", Toast.LENGTH_SHORT).show()
             KLog.i("获取位置失败")
         }
     }
@@ -3494,6 +3422,7 @@ class MainActivity : BaseActivity(), MainContract.View, PNRouterServiceMessageRe
     }
 
     override fun onNewIntent(intent: Intent) {
+        KLog.i("onNewIntent进来了。。。")
         if (intent.dataString != null) {
             var dataString = intent.dataString
             KLog.i(dataString)
@@ -3514,6 +3443,11 @@ class MainActivity : BaseActivity(), MainContract.View, PNRouterServiceMessageRe
             startActivity(shareIntent)
             overridePendingTransition(R.anim.activity_translate_in, R.anim.activity_translate_out)
             return
+        }
+        if (intent.hasExtra("confidantExtra")) {
+            KLog.i(intent.getStringExtra("confidantExtra"))
+            var shareIntent = Intent(this, ActiveListActivity::class.java)
+            startActivity(shareIntent)
         }
     }
 
@@ -3599,266 +3533,271 @@ class MainActivity : BaseActivity(), MainContract.View, PNRouterServiceMessageRe
         }
     }
 
+    fun startAutoLogin() {
+        if ("".equals(SpUtil.getString(this, ConstantValue.routerId, ""))) {
+            startActivity(Intent(this, SplashActivity::class.java))
+            finish()
+            return
+        }
+        AppConfig.instance.isOpenSplashActivity = true
+        ConstantValue.isGooglePlayServicesAvailable = SystemUtil.isGooglePlayServicesAvailable(this)
+        ConstantValue.msgIndex = (System.currentTimeMillis() / 1000).toInt() + (Math.random() * 100).toInt();
+        DeleteUtils.deleteDirectory(Environment.getExternalStorageDirectory().toString() + ConstantValue.localPath + "/temp/")//删除外部查看文件的临时路径
+        FileUtil.init()
+        PathUtils.getInstance().initDirs("", "", AppConfig.instance)
+        DeleteUtils.deleteDirectory(PathUtils.getInstance().getEncryptionAlbumPath().toString() + "/" + "temp")//删除外部查看文件的临时路径
+        DeleteUtils.deleteDirectory(PathUtils.getInstance().getEncryptionWeChatPath().toString() + "/" + "temp")//删除外部查看文件的临时路径
+        DeleteUtils.deleteDirectory(PathUtils.getInstance().getEncryptionAlbumNodePath().toString() + "/" + "temp")//删除外部查看文件的临时路径
+        DeleteUtils.deleteDirectory(PathUtils.getInstance().getEncryptionWeChatNodePath().toString() + "/" + "temp")//删除外部查看文件的临时路径
+        if (ConstantValue.encryptionType.equals("0")) {
+            ConstantValue.privateRAS = SpUtil.getString(AppConfig.instance, ConstantValue.privateRASSp, "")
+            ConstantValue.publicRAS = SpUtil.getString(AppConfig.instance, ConstantValue.publicRASSp, "")
+            if (ConstantValue.privateRAS.equals("") && ConstantValue.publicRAS.equals("")) {
+                val gson = Gson()
+                var rsaData = FileUtil.readKeyData("data");
+                val localRSAArrayList: java.util.ArrayList<RSAData>
+                if (rsaData.equals("") && false) {
+                    val KeyPair = RxEncryptTool.generateRSAKeyPair(1024)
+                    val aahh = KeyPair!!.private.format
+                    val strBase64Private: String = RxEncodeTool.base64Encode2String(KeyPair.private.encoded)
+                    val strBase64Public = RxEncodeTool.base64Encode2String(KeyPair.public.encoded)
+                    ConstantValue.privateRAS = strBase64Private
+                    ConstantValue.publicRAS = strBase64Public
+                    SpUtil.putString(AppConfig.instance, ConstantValue.privateRASSp, ConstantValue.privateRAS!!)
+                    SpUtil.putString(AppConfig.instance, ConstantValue.publicRASSp, ConstantValue.publicRAS!!)
+                    localRSAArrayList = java.util.ArrayList()
+                    var RSAData: RSAData = RSAData()
+                    RSAData.privateKey = strBase64Private
+                    RSAData.publicKey = strBase64Public
+                    localRSAArrayList.add(RSAData)
+                    FileUtil.saveKeyData(gson.toJson(localRSAArrayList), "data")
+                } else {
+                    var rsaStr = rsaData
+                    if (rsaStr != "") {
+                        localRSAArrayList = gson.fromJson<java.util.ArrayList<RSAData>>(rsaStr, object : TypeToken<java.util.ArrayList<RSAData>>() {
+
+                        }.type)
+                        if (localRSAArrayList.size > 0) {
+                            ConstantValue.privateRAS = localRSAArrayList.get(0).privateKey
+                            ConstantValue.publicRAS = localRSAArrayList.get(0).publicKey
+                            SpUtil.putString(AppConfig.instance, ConstantValue.privateRASSp, ConstantValue.privateRAS!!)
+                            SpUtil.putString(AppConfig.instance, ConstantValue.publicRASSp, ConstantValue.publicRAS!!)
+                        }
+                    }
+                }
+            }
+        } else
+        {
+            ConstantValue.libsodiumprivateSignKey = ""
+            ConstantValue.libsodiumpublicSignKey = ""
+            ConstantValue.libsodiumprivateMiKey = ""
+            ConstantValue.libsodiumpublicMiKey = ""
+            ConstantValue.localUserName = ""
+            if (ConstantValue.libsodiumprivateSignKey.equals("") && ConstantValue.libsodiumpublicSignKey.equals("")) {
+                val gson = Gson()
+                var signData = FileUtil.readKeyData("libsodiumdata_sign")
+                var miData = FileUtil.readKeyData("libsodiumdata_mi")
+                val localSignArrayList: java.util.ArrayList<CryptoBoxKeypair>
+                val localMiArrayList: java.util.ArrayList<CryptoBoxKeypair>
+                if (signData.equals("") && false)//不用在这里创建
+                {
+                    var dst_public_SignKey = ByteArray(32)
+                    var dst_private_Signkey = ByteArray(64)
+                    var crypto_box_keypair_result = Sodium.crypto_sign_keypair(dst_public_SignKey, dst_private_Signkey)
+
+                    val strSignPrivate: String = RxEncodeTool.base64Encode2String(dst_private_Signkey)
+                    val strSignPublic = RxEncodeTool.base64Encode2String(dst_public_SignKey)
+                    ConstantValue.libsodiumprivateSignKey = strSignPrivate
+                    ConstantValue.libsodiumpublicSignKey = strSignPublic
+                    SpUtil.putString(AppConfig.instance, ConstantValue.libsodiumprivateSignKeySp, ConstantValue.libsodiumprivateSignKey!!)
+                    SpUtil.putString(AppConfig.instance, ConstantValue.libsodiumpublicSignKeySp, ConstantValue.libsodiumpublicSignKey!!)
+                    localSignArrayList = java.util.ArrayList()
+                    var SignData: CryptoBoxKeypair = CryptoBoxKeypair()
+                    SignData.privateKey = strSignPrivate
+                    SignData.publicKey = strSignPublic
+                    localSignArrayList.add(SignData)
+                    FileUtil.saveKeyData(gson.toJson(localSignArrayList), "libsodiumdata_sign")
+
+
+                    var dst_public_MiKey = ByteArray(32)
+                    var dst_private_Mikey = ByteArray(32)
+                    var crypto_sign_ed25519_pk_to_curve25519_result = Sodium.crypto_sign_ed25519_pk_to_curve25519(dst_public_MiKey, dst_public_SignKey)
+                    var crypto_sign_ed25519_sk_to_curve25519_result = Sodium.crypto_sign_ed25519_sk_to_curve25519(dst_private_Mikey, dst_private_Signkey)
+
+                    val strMiPrivate: String = RxEncodeTool.base64Encode2String(dst_private_Mikey)
+                    val strMiPublic = RxEncodeTool.base64Encode2String(dst_public_MiKey)
+                    ConstantValue.libsodiumprivateMiKey = strMiPrivate
+                    ConstantValue.libsodiumpublicMiKey = strMiPublic
+                    SpUtil.putString(AppConfig.instance, ConstantValue.libsodiumprivateMiKeySp, ConstantValue.libsodiumprivateMiKey!!)
+                    SpUtil.putString(AppConfig.instance, ConstantValue.libsodiumpublicMiKeySp, ConstantValue.libsodiumpublicMiKey!!)
+                    localMiArrayList = java.util.ArrayList()
+                    var RSAData: CryptoBoxKeypair = CryptoBoxKeypair()
+                    RSAData.privateKey = strMiPrivate
+                    RSAData.publicKey = strMiPublic
+                    localMiArrayList.add(RSAData)
+                    FileUtil.saveKeyData(gson.toJson(localMiArrayList), "libsodiumdata_mi")
+
+
+                } else {
+                    var signStr = signData
+                    if (signStr != "") {
+                        localSignArrayList = gson.fromJson<java.util.ArrayList<CryptoBoxKeypair>>(signStr, object : TypeToken<java.util.ArrayList<CryptoBoxKeypair>>() {
+
+                        }.type)
+                        if (localSignArrayList.size > 0) {
+                            ConstantValue.libsodiumprivateSignKey = localSignArrayList.get(0).privateKey
+                            ConstantValue.libsodiumpublicSignKey = localSignArrayList.get(0).publicKey
+                            ConstantValue.localUserName = localSignArrayList.get(0).userName
+                            SpUtil.putString(AppConfig.instance, ConstantValue.libsodiumprivateSignKeySp, ConstantValue.libsodiumprivateSignKey!!)
+                            SpUtil.putString(AppConfig.instance, ConstantValue.libsodiumpublicSignKeySp, ConstantValue.libsodiumpublicSignKey!!)
+                            SpUtil.putString(AppConfig.instance, ConstantValue.localUserNameSp, ConstantValue.localUserName!!)
+                            SpUtil.putString(AppConfig.instance, ConstantValue.username, ConstantValue.localUserName!!)
+                        }
+                    }
+
+                    var miStr = miData
+                    if (miStr != "") {
+                        localMiArrayList = gson.fromJson<java.util.ArrayList<CryptoBoxKeypair>>(miStr, object : TypeToken<java.util.ArrayList<CryptoBoxKeypair>>() {
+
+                        }.type)
+                        if (localMiArrayList.size > 0) {
+                            ConstantValue.libsodiumprivateMiKey = localMiArrayList.get(0).privateKey
+                            ConstantValue.libsodiumpublicMiKey = localMiArrayList.get(0).publicKey
+                            ConstantValue.localUserName = localMiArrayList.get(0).userName
+                            SpUtil.putString(AppConfig.instance, ConstantValue.libsodiumprivateMiKeySp, ConstantValue.libsodiumprivateMiKey!!)
+                            SpUtil.putString(AppConfig.instance, ConstantValue.libsodiumpublicMiKeySp, ConstantValue.libsodiumpublicMiKey!!)
+                            SpUtil.putString(AppConfig.instance, ConstantValue.localUserNameSp, ConstantValue.localUserName!!)
+                            SpUtil.putString(AppConfig.instance, ConstantValue.username, ConstantValue.localUserName!!)
+                        }
+                    }
+                    if (ConstantValue.libsodiumprivateSignKey != "") {
+                        var seed = Helper.byteToHexString(RxEncodeTool.base64Decode(ConstantValue.libsodiumprivateSignKey)).toLowerCase();
+                        seed = seed.substring(0, 64)
+                        try {
+                            var jsonObject = AccountMng.keyPairFromSeed(Helper.hexStringToBytes(seed), 0);
+                            var priKey = jsonObject.getString("privKey");
+                            var pubKey = jsonObject.getString("pubKey");
+                            KLog.i(jsonObject.toJSONString());
+                            var jsonArray = JSONArray()
+                            jsonArray.add(seed);
+                            var mnemonics = AccountRpc.seedToMnemonics(jsonArray);
+                            KLog.i(mnemonics);
+                            var address = QlcUtil.publicToAddress(pubKey).toLowerCase();
+                            var qlcAccountEntityList = AppConfig.instance.mDaoMaster!!.newSession().qlcAccountDao.queryBuilder().where(QLCAccountDao.Properties.Address.eq(address)).list()
+                            if (qlcAccountEntityList == null || qlcAccountEntityList.size == 0) {
+                                var qlcAccount = QLCAccount();
+                                qlcAccount.setPrivKey(priKey.toLowerCase());
+                                qlcAccount.setPubKey(pubKey);
+                                qlcAccount.setAddress(address);
+                                qlcAccount.setMnemonic(mnemonics);
+                                qlcAccount.setIsCurrent(true);
+                                qlcAccount.setAccountName("confidant");
+                                qlcAccount.setSeed(seed);
+                                qlcAccount.setIsAccountSeed(true);
+                                qlcAccount.setWalletIndex(0);
+                                AppConfig.instance.mDaoMaster!!.newSession().qlcAccountDao.insert(qlcAccount);
+                            }
+                        } catch (e: Exception) {
+                            //closeProgressDialog();
+                            e.printStackTrace();
+                        }
+                    }
+
+                }
+            }
+        }
+        AppConfig.instance.mDaoMaster!!.newSession().routerEntityDao.deleteAll()
+        LocalRouterUtils.inspectionLocalData();
+        LocalRouterUtils.updateGreanDaoFromLocal()
+        var tempFile = AppConfig.instance.getFilesDir().getAbsolutePath() + "/temp/"//删除聊天的临时加密文件
+        val savedNodeFile = Environment.getExternalStorageDirectory().toString() + ConstantValue.localPath + "/Nodefile.json"
+        RxFileTool.deleteFilesInDir(tempFile)
+        RxFileTool.deleteNodefile(savedNodeFile)
+        val userId = SpUtil.getString(AppConfig.instance, ConstantValue.userId, "")
+        if (userId == null || userId.equals("")) {
+            DeleteUtils.deleteFile(Environment.getExternalStorageDirectory().toString() + ConstantValue.localPath + "/RouterList/fileData3.json")
+        }
+        FileUtil.drawableToFile(AppConfig.instance, R.drawable.image_defalut_bg, "image_defalut_bg.xml", 1)
+        FileUtil.drawableToFile(AppConfig.instance, R.drawable.image_defalut_bg, "image_defalut_fileForward_bg.xml", 1)
+        FileUtil.drawableToFile(AppConfig.instance, R.mipmap.ic_upload_photo, "image_defalut_bg.png", 1)
+        FileUtil.drawableToFile(AppConfig.instance, R.mipmap.doc_img_default, "image_defalut_fileForward_bg.png", 1)
+        FileUtil.drawableToFile(AppConfig.instance, R.drawable.image_defalut_bg, "ease_default_amr.amr", 2)
+        FileUtil.drawableToFile(AppConfig.instance, R.drawable.image_defalut_bg, "ease_default_vedio.mp4", 3)
+        FileUtil.drawableToFile(AppConfig.instance, R.drawable.image_defalut_bg, "ease_default_fileForward_vedio.mp4", 3)
+        FileUtil.drawableToFile(AppConfig.instance, R.drawable.image_defalut_bg, "file_downloading.*", 5)
+        FileUtil.drawableToFile(AppConfig.instance, R.drawable.image_defalut_bg, "file_fileForward.*", 5)
+
+
+        var needCreate = false;
+        var picMenuList = AppConfig.instance.mDaoMaster!!.newSession().localFileMenuDao.queryBuilder().where(LocalFileMenuDao.Properties.Type.eq("0")).list()
+        if (picMenuList == null || picMenuList.size == 0) {
+            needCreate = true
+        }
+        var defaultfolder = PathUtils.getInstance().getEncryptionAlbumPath().toString() + "/defaultfolder"
+        var defaultfolderFile = File(defaultfolder)
+        if (needCreate && !defaultfolderFile.exists()) {
+            defaultfolderFile.mkdirs();
+            var localFileMenu = LocalFileMenu();
+            localFileMenu.creatTime = System.currentTimeMillis();
+            localFileMenu.fileName = "Default album"
+            localFileMenu.path = defaultfolder
+            localFileMenu.fileNum = 0
+            localFileMenu.type = "0"
+            AppConfig.instance.mDaoMaster!!.newSession().localFileMenuDao.insert(localFileMenu)
+        }
+        var needCreateWechat = false;
+        var picMenuListWechat = AppConfig.instance.mDaoMaster!!.newSession().localFileMenuDao.queryBuilder().where(LocalFileMenuDao.Properties.Type.eq("1")).list()
+        if (picMenuListWechat == null || picMenuListWechat.size == 0) {
+            needCreateWechat = true
+        }
+        var defaultwechatfolder = PathUtils.getInstance().getEncryptionWeChatPath().toString() + "/defaultwechatfolder"
+        var defaultwechatfolderFile = File(defaultwechatfolder)
+        if (needCreateWechat && !defaultwechatfolderFile.exists()) {
+            defaultwechatfolderFile.mkdirs();
+            var localFileMenu = LocalFileMenu();
+            localFileMenu.creatTime = System.currentTimeMillis();
+            localFileMenu.fileName = "Default Wechat Folder"
+            localFileMenu.path = defaultwechatfolder
+            localFileMenu.fileNum = 0
+            localFileMenu.type = "1"
+            AppConfig.instance.mDaoMaster!!.newSession().localFileMenuDao.insert(localFileMenu)
+        }
+        /*FileUtil.getKongFile("image_defalut_bg.xml")
+        FileUtil.getKongFile("image_defalut_bg.png")
+        FileUtil.getKongFile("image_defalut_fileForward_bg.png")
+        FileUtil.getKongFile("ease_default_amr.amr")
+        FileUtil.getKongFile("ease_default_vedio.mp4")
+        FileUtil.getKongFile("ease_default_fileForward_vedio.mp4")
+        FileUtil.getKongFile("file_downloading.*")
+        FileUtil.getKongFile("file_fileForward.*")*/
+        var routerList = AppConfig.instance.mDaoMaster!!.newSession().routerEntityDao.loadAll()
+        var abvc = ""
+        routerList.forEach {
+            if (it.routerId == null || it.routerId.equals("") || it.userSn == null || it.userSn.equals("") || it.userId == null || it.userId.equals("")) {
+                AppConfig.instance.mDaoMaster!!.newSession().routerEntityDao.delete(it)
+            }
+        }
+
+        var lastLoginRouterId = FileUtil.getLocalUserData("routerid")
+        var lastLoginUserSn = FileUtil.getLocalUserData("usersn")
+        ConstantValue.currentRouterId = lastLoginRouterId;
+
+        //这里不要注释
+        var dst_public_TemKey_My = ByteArray(32)
+        var dst_private_Temkey_My = ByteArray(32)
+        var crypto_box_keypair_Temresult = Sodium.crypto_box_keypair(dst_public_TemKey_My, dst_private_Temkey_My)
+        ConstantValue.libsodiumprivateTemKey = RxEncodeTool.base64Encode2String(dst_private_Temkey_My)
+        ConstantValue.libsodiumpublicTemKey = RxEncodeTool.base64Encode2String(dst_public_TemKey_My)
+        handlerAutoLogin()
+    }
+
     override fun initData() {
         KLog.i(this)
         getLocation()
         window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         reConnect.visibility = View.GONE
         if (intent.dataString != null) {
-            if ("".equals(SpUtil.getString(this, ConstantValue.routerId, ""))) {
-                startActivity(Intent(this, SplashActivity::class.java))
-                finish()
-                return
-            }
-            AppConfig.instance.isOpenSplashActivity = true
-            ConstantValue.isGooglePlayServicesAvailable = SystemUtil.isGooglePlayServicesAvailable(this)
-            ConstantValue.msgIndex = (System.currentTimeMillis() / 1000).toInt() + (Math.random() * 100).toInt();
-            DeleteUtils.deleteDirectory(Environment.getExternalStorageDirectory().toString() + ConstantValue.localPath + "/temp/")//删除外部查看文件的临时路径
-            FileUtil.init()
-            PathUtils.getInstance().initDirs("", "", AppConfig.instance)
-            DeleteUtils.deleteDirectory(PathUtils.getInstance().getEncryptionAlbumPath().toString() + "/" + "temp")//删除外部查看文件的临时路径
-            DeleteUtils.deleteDirectory(PathUtils.getInstance().getEncryptionWeChatPath().toString() + "/" + "temp")//删除外部查看文件的临时路径
-            DeleteUtils.deleteDirectory(PathUtils.getInstance().getEncryptionAlbumNodePath().toString() + "/" + "temp")//删除外部查看文件的临时路径
-            DeleteUtils.deleteDirectory(PathUtils.getInstance().getEncryptionWeChatNodePath().toString() + "/" + "temp")//删除外部查看文件的临时路径
-            if (ConstantValue.encryptionType.equals("0")) {
-                ConstantValue.privateRAS = SpUtil.getString(AppConfig.instance, ConstantValue.privateRASSp, "")
-                ConstantValue.publicRAS = SpUtil.getString(AppConfig.instance, ConstantValue.publicRASSp, "")
-                if (ConstantValue.privateRAS.equals("") && ConstantValue.publicRAS.equals("")) {
-                    val gson = Gson()
-                    var rsaData = FileUtil.readKeyData("data");
-                    val localRSAArrayList: java.util.ArrayList<RSAData>
-                    if (rsaData.equals("") && false) {
-                        val KeyPair = RxEncryptTool.generateRSAKeyPair(1024)
-                        val aahh = KeyPair!!.private.format
-                        val strBase64Private: String = RxEncodeTool.base64Encode2String(KeyPair.private.encoded)
-                        val strBase64Public = RxEncodeTool.base64Encode2String(KeyPair.public.encoded)
-                        ConstantValue.privateRAS = strBase64Private
-                        ConstantValue.publicRAS = strBase64Public
-                        SpUtil.putString(AppConfig.instance, ConstantValue.privateRASSp, ConstantValue.privateRAS!!)
-                        SpUtil.putString(AppConfig.instance, ConstantValue.publicRASSp, ConstantValue.publicRAS!!)
-                        localRSAArrayList = java.util.ArrayList()
-                        var RSAData: RSAData = RSAData()
-                        RSAData.privateKey = strBase64Private
-                        RSAData.publicKey = strBase64Public
-                        localRSAArrayList.add(RSAData)
-                        FileUtil.saveKeyData(gson.toJson(localRSAArrayList), "data")
-                    } else {
-                        var rsaStr = rsaData
-                        if (rsaStr != "") {
-                            localRSAArrayList = gson.fromJson<java.util.ArrayList<RSAData>>(rsaStr, object : TypeToken<java.util.ArrayList<RSAData>>() {
-
-                            }.type)
-                            if (localRSAArrayList.size > 0) {
-                                ConstantValue.privateRAS = localRSAArrayList.get(0).privateKey
-                                ConstantValue.publicRAS = localRSAArrayList.get(0).publicKey
-                                SpUtil.putString(AppConfig.instance, ConstantValue.privateRASSp, ConstantValue.privateRAS!!)
-                                SpUtil.putString(AppConfig.instance, ConstantValue.publicRASSp, ConstantValue.publicRAS!!)
-                            }
-                        }
-                    }
-                }
-            } else
-            {
-                ConstantValue.libsodiumprivateSignKey = ""
-                ConstantValue.libsodiumpublicSignKey = ""
-                ConstantValue.libsodiumprivateMiKey = ""
-                ConstantValue.libsodiumpublicMiKey = ""
-                ConstantValue.localUserName = ""
-                if (ConstantValue.libsodiumprivateSignKey.equals("") && ConstantValue.libsodiumpublicSignKey.equals("")) {
-                    val gson = Gson()
-                    var signData = FileUtil.readKeyData("libsodiumdata_sign")
-                    var miData = FileUtil.readKeyData("libsodiumdata_mi")
-                    val localSignArrayList: java.util.ArrayList<CryptoBoxKeypair>
-                    val localMiArrayList: java.util.ArrayList<CryptoBoxKeypair>
-                    if (signData.equals("") && false)//不用在这里创建
-                    {
-                        var dst_public_SignKey = ByteArray(32)
-                        var dst_private_Signkey = ByteArray(64)
-                        var crypto_box_keypair_result = Sodium.crypto_sign_keypair(dst_public_SignKey, dst_private_Signkey)
-
-                        val strSignPrivate: String = RxEncodeTool.base64Encode2String(dst_private_Signkey)
-                        val strSignPublic = RxEncodeTool.base64Encode2String(dst_public_SignKey)
-                        ConstantValue.libsodiumprivateSignKey = strSignPrivate
-                        ConstantValue.libsodiumpublicSignKey = strSignPublic
-                        SpUtil.putString(AppConfig.instance, ConstantValue.libsodiumprivateSignKeySp, ConstantValue.libsodiumprivateSignKey!!)
-                        SpUtil.putString(AppConfig.instance, ConstantValue.libsodiumpublicSignKeySp, ConstantValue.libsodiumpublicSignKey!!)
-                        localSignArrayList = java.util.ArrayList()
-                        var SignData: CryptoBoxKeypair = CryptoBoxKeypair()
-                        SignData.privateKey = strSignPrivate
-                        SignData.publicKey = strSignPublic
-                        localSignArrayList.add(SignData)
-                        FileUtil.saveKeyData(gson.toJson(localSignArrayList), "libsodiumdata_sign")
-
-
-                        var dst_public_MiKey = ByteArray(32)
-                        var dst_private_Mikey = ByteArray(32)
-                        var crypto_sign_ed25519_pk_to_curve25519_result = Sodium.crypto_sign_ed25519_pk_to_curve25519(dst_public_MiKey, dst_public_SignKey)
-                        var crypto_sign_ed25519_sk_to_curve25519_result = Sodium.crypto_sign_ed25519_sk_to_curve25519(dst_private_Mikey, dst_private_Signkey)
-
-                        val strMiPrivate: String = RxEncodeTool.base64Encode2String(dst_private_Mikey)
-                        val strMiPublic = RxEncodeTool.base64Encode2String(dst_public_MiKey)
-                        ConstantValue.libsodiumprivateMiKey = strMiPrivate
-                        ConstantValue.libsodiumpublicMiKey = strMiPublic
-                        SpUtil.putString(AppConfig.instance, ConstantValue.libsodiumprivateMiKeySp, ConstantValue.libsodiumprivateMiKey!!)
-                        SpUtil.putString(AppConfig.instance, ConstantValue.libsodiumpublicMiKeySp, ConstantValue.libsodiumpublicMiKey!!)
-                        localMiArrayList = java.util.ArrayList()
-                        var RSAData: CryptoBoxKeypair = CryptoBoxKeypair()
-                        RSAData.privateKey = strMiPrivate
-                        RSAData.publicKey = strMiPublic
-                        localMiArrayList.add(RSAData)
-                        FileUtil.saveKeyData(gson.toJson(localMiArrayList), "libsodiumdata_mi")
-
-
-                    } else {
-                        var signStr = signData
-                        if (signStr != "") {
-                            localSignArrayList = gson.fromJson<java.util.ArrayList<CryptoBoxKeypair>>(signStr, object : TypeToken<java.util.ArrayList<CryptoBoxKeypair>>() {
-
-                            }.type)
-                            if (localSignArrayList.size > 0) {
-                                ConstantValue.libsodiumprivateSignKey = localSignArrayList.get(0).privateKey
-                                ConstantValue.libsodiumpublicSignKey = localSignArrayList.get(0).publicKey
-                                ConstantValue.localUserName = localSignArrayList.get(0).userName
-                                SpUtil.putString(AppConfig.instance, ConstantValue.libsodiumprivateSignKeySp, ConstantValue.libsodiumprivateSignKey!!)
-                                SpUtil.putString(AppConfig.instance, ConstantValue.libsodiumpublicSignKeySp, ConstantValue.libsodiumpublicSignKey!!)
-                                SpUtil.putString(AppConfig.instance, ConstantValue.localUserNameSp, ConstantValue.localUserName!!)
-                                SpUtil.putString(AppConfig.instance, ConstantValue.username, ConstantValue.localUserName!!)
-                            }
-                        }
-
-                        var miStr = miData
-                        if (miStr != "") {
-                            localMiArrayList = gson.fromJson<java.util.ArrayList<CryptoBoxKeypair>>(miStr, object : TypeToken<java.util.ArrayList<CryptoBoxKeypair>>() {
-
-                            }.type)
-                            if (localMiArrayList.size > 0) {
-                                ConstantValue.libsodiumprivateMiKey = localMiArrayList.get(0).privateKey
-                                ConstantValue.libsodiumpublicMiKey = localMiArrayList.get(0).publicKey
-                                ConstantValue.localUserName = localMiArrayList.get(0).userName
-                                SpUtil.putString(AppConfig.instance, ConstantValue.libsodiumprivateMiKeySp, ConstantValue.libsodiumprivateMiKey!!)
-                                SpUtil.putString(AppConfig.instance, ConstantValue.libsodiumpublicMiKeySp, ConstantValue.libsodiumpublicMiKey!!)
-                                SpUtil.putString(AppConfig.instance, ConstantValue.localUserNameSp, ConstantValue.localUserName!!)
-                                SpUtil.putString(AppConfig.instance, ConstantValue.username, ConstantValue.localUserName!!)
-                            }
-                        }
-                        if (ConstantValue.libsodiumprivateSignKey != "") {
-                            var seed = Helper.byteToHexString(RxEncodeTool.base64Decode(ConstantValue.libsodiumprivateSignKey)).toLowerCase();
-                            seed = seed.substring(0, 64)
-                            try {
-                                var jsonObject = AccountMng.keyPairFromSeed(Helper.hexStringToBytes(seed), 0);
-                                var priKey = jsonObject.getString("privKey");
-                                var pubKey = jsonObject.getString("pubKey");
-                                KLog.i(jsonObject.toJSONString());
-                                var jsonArray = JSONArray()
-                                jsonArray.add(seed);
-                                var mnemonics = AccountRpc.seedToMnemonics(jsonArray);
-                                KLog.i(mnemonics);
-                                var address = QlcUtil.publicToAddress(pubKey).toLowerCase();
-                                var qlcAccountEntityList = AppConfig.instance.mDaoMaster!!.newSession().qlcAccountDao.queryBuilder().where(QLCAccountDao.Properties.Address.eq(address)).list()
-                                if (qlcAccountEntityList == null || qlcAccountEntityList.size == 0) {
-                                    var qlcAccount = QLCAccount();
-                                    qlcAccount.setPrivKey(priKey.toLowerCase());
-                                    qlcAccount.setPubKey(pubKey);
-                                    qlcAccount.setAddress(address);
-                                    qlcAccount.setMnemonic(mnemonics);
-                                    qlcAccount.setIsCurrent(true);
-                                    qlcAccount.setAccountName("confidant");
-                                    qlcAccount.setSeed(seed);
-                                    qlcAccount.setIsAccountSeed(true);
-                                    qlcAccount.setWalletIndex(0);
-                                    AppConfig.instance.mDaoMaster!!.newSession().qlcAccountDao.insert(qlcAccount);
-                                }
-                            } catch (e: Exception) {
-                                //closeProgressDialog();
-                                e.printStackTrace();
-                            }
-                        }
-
-                    }
-                }
-            }
-            AppConfig.instance.mDaoMaster!!.newSession().routerEntityDao.deleteAll()
-            LocalRouterUtils.inspectionLocalData();
-            LocalRouterUtils.updateGreanDaoFromLocal()
-            var tempFile = AppConfig.instance.getFilesDir().getAbsolutePath() + "/temp/"//删除聊天的临时加密文件
-            val savedNodeFile = Environment.getExternalStorageDirectory().toString() + ConstantValue.localPath + "/Nodefile.json"
-            RxFileTool.deleteFilesInDir(tempFile)
-            RxFileTool.deleteNodefile(savedNodeFile)
-            val userId = SpUtil.getString(AppConfig.instance, ConstantValue.userId, "")
-            if (userId == null || userId.equals("")) {
-                DeleteUtils.deleteFile(Environment.getExternalStorageDirectory().toString() + ConstantValue.localPath + "/RouterList/fileData3.json")
-            }
-            FileUtil.drawableToFile(AppConfig.instance, R.drawable.image_defalut_bg, "image_defalut_bg.xml", 1)
-            FileUtil.drawableToFile(AppConfig.instance, R.drawable.image_defalut_bg, "image_defalut_fileForward_bg.xml", 1)
-            FileUtil.drawableToFile(AppConfig.instance, R.mipmap.ic_upload_photo, "image_defalut_bg.png", 1)
-            FileUtil.drawableToFile(AppConfig.instance, R.mipmap.doc_img_default, "image_defalut_fileForward_bg.png", 1)
-            FileUtil.drawableToFile(AppConfig.instance, R.drawable.image_defalut_bg, "ease_default_amr.amr", 2)
-            FileUtil.drawableToFile(AppConfig.instance, R.drawable.image_defalut_bg, "ease_default_vedio.mp4", 3)
-            FileUtil.drawableToFile(AppConfig.instance, R.drawable.image_defalut_bg, "ease_default_fileForward_vedio.mp4", 3)
-            FileUtil.drawableToFile(AppConfig.instance, R.drawable.image_defalut_bg, "file_downloading.*", 5)
-            FileUtil.drawableToFile(AppConfig.instance, R.drawable.image_defalut_bg, "file_fileForward.*", 5)
-
-
-            var needCreate = false;
-            var picMenuList = AppConfig.instance.mDaoMaster!!.newSession().localFileMenuDao.queryBuilder().where(LocalFileMenuDao.Properties.Type.eq("0")).list()
-            if (picMenuList == null || picMenuList.size == 0) {
-                needCreate = true
-            }
-            var defaultfolder = PathUtils.getInstance().getEncryptionAlbumPath().toString() + "/defaultfolder"
-            var defaultfolderFile = File(defaultfolder)
-            if (needCreate && !defaultfolderFile.exists()) {
-                defaultfolderFile.mkdirs();
-                var localFileMenu = LocalFileMenu();
-                localFileMenu.creatTime = System.currentTimeMillis();
-                localFileMenu.fileName = "Default album"
-                localFileMenu.path = defaultfolder
-                localFileMenu.fileNum = 0
-                localFileMenu.type = "0"
-                AppConfig.instance.mDaoMaster!!.newSession().localFileMenuDao.insert(localFileMenu)
-            }
-            var needCreateWechat = false;
-            var picMenuListWechat = AppConfig.instance.mDaoMaster!!.newSession().localFileMenuDao.queryBuilder().where(LocalFileMenuDao.Properties.Type.eq("1")).list()
-            if (picMenuListWechat == null || picMenuListWechat.size == 0) {
-                needCreateWechat = true
-            }
-            var defaultwechatfolder = PathUtils.getInstance().getEncryptionWeChatPath().toString() + "/defaultwechatfolder"
-            var defaultwechatfolderFile = File(defaultwechatfolder)
-            if (needCreateWechat && !defaultwechatfolderFile.exists()) {
-                defaultwechatfolderFile.mkdirs();
-                var localFileMenu = LocalFileMenu();
-                localFileMenu.creatTime = System.currentTimeMillis();
-                localFileMenu.fileName = "Default Wechat Folder"
-                localFileMenu.path = defaultwechatfolder
-                localFileMenu.fileNum = 0
-                localFileMenu.type = "1"
-                AppConfig.instance.mDaoMaster!!.newSession().localFileMenuDao.insert(localFileMenu)
-            }
-            /*FileUtil.getKongFile("image_defalut_bg.xml")
-            FileUtil.getKongFile("image_defalut_bg.png")
-            FileUtil.getKongFile("image_defalut_fileForward_bg.png")
-            FileUtil.getKongFile("ease_default_amr.amr")
-            FileUtil.getKongFile("ease_default_vedio.mp4")
-            FileUtil.getKongFile("ease_default_fileForward_vedio.mp4")
-            FileUtil.getKongFile("file_downloading.*")
-            FileUtil.getKongFile("file_fileForward.*")*/
-            var routerList = AppConfig.instance.mDaoMaster!!.newSession().routerEntityDao.loadAll()
-            var abvc = ""
-            routerList.forEach {
-                if (it.routerId == null || it.routerId.equals("") || it.userSn == null || it.userSn.equals("") || it.userId == null || it.userId.equals("")) {
-                    AppConfig.instance.mDaoMaster!!.newSession().routerEntityDao.delete(it)
-                }
-            }
-
-            var lastLoginRouterId = FileUtil.getLocalUserData("routerid")
-            var lastLoginUserSn = FileUtil.getLocalUserData("usersn")
-            ConstantValue.currentRouterId = lastLoginRouterId;
-
-            //这里不要注释
-            var dst_public_TemKey_My = ByteArray(32)
-            var dst_private_Temkey_My = ByteArray(32)
-            var crypto_box_keypair_Temresult = Sodium.crypto_box_keypair(dst_public_TemKey_My, dst_private_Temkey_My)
-            ConstantValue.libsodiumprivateTemKey = RxEncodeTool.base64Encode2String(dst_private_Temkey_My)
-            ConstantValue.libsodiumpublicTemKey = RxEncodeTool.base64Encode2String(dst_public_TemKey_My)
+            startAutoLogin()
             runDelayedOnUiThread(500) {
                 var dataString = intent.dataString
                 KLog.i(dataString)
@@ -3880,7 +3819,14 @@ class MainActivity : BaseActivity(), MainContract.View, PNRouterServiceMessageRe
                 startActivity(shareIntent)
                 overridePendingTransition(R.anim.activity_translate_in, R.anim.activity_translate_out)
             }
-            handlerAutoLogin()
+        }
+        if (intent.hasExtra("confidantExtra")) {
+            KLog.i(intent.getStringExtra("confidantExtra"))
+            startAutoLogin()
+            runDelayedOnUiThread(500) {
+                var shareIntent = Intent(this, ActiveListActivity::class.java)
+                startActivity(shareIntent)
+            }
         }
         standaloneCoroutine = launch(CommonPool) {
             delay(10000)
@@ -4071,24 +4017,25 @@ class MainActivity : BaseActivity(), MainContract.View, PNRouterServiceMessageRe
                 while (isSendRegId) {
                     Thread.sleep(5 * 1000)
                     ConstantValue.mJiGuangRegId = JPushInterface.getRegistrationID(applicationContext)
-                    var aa = ConstantValue.mHuaWeiRegId
+                    var selfUserId = SpUtil.getString(this, ConstantValue.userId, "")
+                    var lastLoginUserSn = FileUtil.getLocalUserData("usersn")
+
                     var map: HashMap<String, String> = HashMap()
                     var os = VersionUtil.getDeviceBrand()
-                    map.put("os", os.toString())
-                    map.put("appversion", BuildConfig.VERSION_NAME)
-                    if (os == 3) {
-                        map.put("regid", ConstantValue.mJiGuangRegId)
-                        map.put("token", ConstantValue.mHuaWeiRegId)
-                    } else {
-                        map.put("regid", ConstantValue.mRegId)
-                        map.put("token", ConstantValue.mJiGuangRegId)
-                    }
-                    map.put("topicid", "")
-                    var selfUserId = SpUtil.getString(this, ConstantValue.userId, "")
-                    map.put("routerid", ConstantValue.currentRouterId)
-                    map.put("userid", selfUserId!!)
-                    var lastLoginUserSn = FileUtil.getLocalUserData("usersn")
-                    map.put("usersn", lastLoginUserSn)
+                    map.put("Os", os.toString())
+                    map.put("RegionCode", countryCode)
+                    map.put("RegionName", countryName)
+                    map.put("AppId", "1")
+                    map.put("AppVersion", BuildConfig.VERSION_NAME)
+                    map.put("RouterId", ConstantValue.currentRouterId)
+                    map.put("UserId", selfUserId!!)
+                    map.put("MiToken", ConstantValue.mRegId)
+                    map.put("JpushToken", ConstantValue.mJiGuangRegId)
+                    map.put("HmsToken", ConstantValue.mHuaWeiRegId)
+                    map.put("FcmToken", ConstantValue.fcmToken)
+                    map.put("TimeStamp", System.currentTimeMillis().toString())
+                    map["RegHash"] = String(RxEncodeTool.base64Encode(ConstantValue.fcmToken + ConstantValue.mHuaWeiRegId + ConstantValue.mJiGuangRegId + ConstantValue.mRegId)).substring(0, 20)
+
                     KLog.i("小米推送注册RegId= " + ConstantValue.mRegId)
                     KLog.i("华为推送注册RegId= " + ConstantValue.mHuaWeiRegId)
                     KLog.i("极光推送注册RegId= " + ConstantValue.mJiGuangRegId)
@@ -4105,7 +4052,7 @@ class MainActivity : BaseActivity(), MainContract.View, PNRouterServiceMessageRe
                         override fun onResponse(json: String) {
                             isSendRegId = false
                             LogUtil.addLog("小米推送注册成功:", "MainActivity")
-                            KLog.i("小米推送注册成功:MainActivity" + json)
+                            KLog.i("推送注册成功:MainActivity" + json)
                             //Toast.makeText(AppConfig.instance,"成功",Toast.LENGTH_SHORT).show()
                         }
                     });
@@ -4978,7 +4925,8 @@ class MainActivity : BaseActivity(), MainContract.View, PNRouterServiceMessageRe
                             if (conversation != null) {
                                 var gson = Gson()
                                 var Message = Message()
-                                Message.setMsg(pushMsgRsp.getParams().getMsg())
+//                                Message.setMsg(pushMsgRsp.getParams().getMsg())
+                                Message.setMsg(msgSouce)
                                 Message.setMsgId(pushMsgRsp.getParams().getMsgId())
                                 Message.setFrom(pushMsgRsp.getParams().getFromId())
                                 Message.setTo(pushMsgRsp.getParams().getToId())
@@ -5080,22 +5028,6 @@ class MainActivity : BaseActivity(), MainContract.View, PNRouterServiceMessageRe
         })
         alphaIndicator.setViewPager(viewPager)
 
-        // 为bnv设置选择监听事件
-//        bottomNavigation.setOnNavigationItemSelectedListener {
-//            when (it.getItemId()) {
-//                R.id.item_news -> viewPager.setCurrentItem(0, false)
-//                R.id.item_file -> viewPager.setCurrentItem(1, false)
-//                R.id.item_contacts -> viewPager.setCurrentItem(2, false)
-//                R.id.item_my -> viewPager.setCurrentItem(3, false)
-//            }
-//            true
-//        }
-//        tv_hello.text = "hahhaha"
-//        tv_hello.setOnClickListener {
-//            mPresenter.showToast()
-//            startActivity(Intent(this, TestActivity::class.java))
-//        }
-//        tv_hello.typeface.style
         viewPager.offscreenPageLimit = 4
 
 
@@ -5130,6 +5062,9 @@ class MainActivity : BaseActivity(), MainContract.View, PNRouterServiceMessageRe
             ConstantValue.shareFromLocalPath = ""
         }
         initEvent()
+        runDelayedOnUiThread(300) {
+            initLeftSubMenuName()
+        }
     }
 
 

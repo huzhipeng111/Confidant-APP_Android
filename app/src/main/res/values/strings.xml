@@ -865,8 +865,8 @@ Then enter your Email address and password to log in.</string>
     <string name="PassworkHint">&#160;&#160;Password Hint (optional)</string>
     <string name="Encrypted_Email">Encrypted Email</string>
     <string name="Encrypted_client">Encrypted Email client and beyond - your comprehensive privacy protection tool</string>
-    <string name="You_have_received_a_secure_message_from">You have received a secure message from</string>
-    <string name="imusering">I’m using Confidant to send and receive secure emails.Click the link below to decrypt and view my message.</string>
+    <string name="You_have_received_a_secure_message_from">You just received a secure message from</string>
+    <string name="imusering">I’m using Confidant to send and receive secure emails. Download and install Confidant to decrypt and read the email content via the link below.</string>
     <string name="View_Encrypted_Message">View Encrypted Message</string>
     <string name="Decrypt_Email">Decrypt Email</string>
     <string name="Decrypt">Decrypt</string>
@@ -949,5 +949,8 @@ Then enter your Email address and password to log in.</string>
     <string name="Encryption_failed">Encryption failed</string>
     <string name="Interface_call_failed">Interface call failed</string>
     <string name="default_notification_channel_id">xx</string>
+    <string name="campaign_update">Campaign Updates</string>
+    <string name="feedback">Feedback</string>
+    <string name="fine_now">Fine Now</string>
 
 </resources>

@@ -111,6 +111,7 @@ public class EaseMessageAdapter extends BaseAdapter {
 				System.out.println("消息打印:"+PushService+"_"+time);
 			}*/
             notifyDataSetChanged();
+            KLog.i("刷新之后");
         }
 
         @Override

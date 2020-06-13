@@ -106,7 +106,7 @@ class NewFriendActivity : BaseActivity(), NewFriendContract.View {
         var localFriendStatusList = AppConfig.instance.mDaoMaster!!.newSession().friendEntityDao.loadAll()
         var userId = SpUtil.getString(AppConfig.instance, ConstantValue.userId, "")
         for (i in localFriendStatusList) {
-            if (i.userId.equals(userId)) {
+            if (i.userId.equals(userId) && !i.friendId.equals(userId)) {
                 if (i.friendLocalStatus == 0) {
                     var it = UserEntity()
                     var localFriendList = AppConfig.instance.mDaoMaster!!.newSession().userEntityDao.queryBuilder().where(UserEntityDao.Properties.UserId.eq(i.friendId)).list()

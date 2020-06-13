@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/parent"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:id="@+id/ll_popup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="23dp"
+            android:text="Receiving Wallets"
+            android:textStyle="bold"
+            android:textColor="@color/FF1E1E24"
+            android:textSize="15sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="15dp"
+            android:text="NEO Wallet to receive QLC"
+            android:textColor="@color/FF1E1E24"
+            android:textSize="15sp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:gravity="center_vertical"
+            android:layout_height="40dp">
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_marginLeft="15dp"
+                android:src="@mipmap/sheet_qlc"
+                android:layout_height="20dp"/>
+            <TextView
+                android:id="@+id/etNeoWalletAddress"
+                android:layout_width="0dp"
+                android:hint="NEO Wallet Address"
+                android:background="@null"
+                android:layout_marginLeft="10dp"
+                android:textSize="15sp"
+                android:textColor="@color/FF1E1E24"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+            <ImageView
+                android:id="@+id/ivReNeoSetWallet"
+                android:layout_width="20dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginLeft="15dp"
+                android:src="@mipmap/sheet_rename"
+                android:layout_height="20dp"/>
+        </LinearLayout>
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="15dp"
+            android:text="QLC Wallet to receive QGAS"
+            android:textColor="@color/FF1E1E24"
+            android:textSize="15sp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:gravity="center_vertical"
+            android:layout_height="40dp">
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_marginLeft="15dp"
+                android:src="@mipmap/sheet_qgas"
+                android:layout_height="20dp"/>
+            <TextView
+                android:id="@+id/etQlcWalletAddress"
+                android:layout_width="0dp"
+                android:background="@null"
+                android:layout_marginLeft="10dp"
+                android:hint="QLC Chain Wallet Address"
+                android:textSize="15sp"
+                android:textColor="@color/FF1E1E24"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+            <ImageView
+                android:id="@+id/ivQlcReSetWallet"
+                android:layout_width="20dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginLeft="15dp"
+                android:src="@mipmap/sheet_rename"
+                android:layout_height="20dp"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

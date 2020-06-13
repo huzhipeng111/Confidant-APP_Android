@@ -32,6 +32,7 @@ import com.luck.picture.lib.adapter.SimpleFragmentAdapter
 import com.luck.picture.lib.config.PictureConfig
 import com.luck.picture.lib.config.PictureMimeType
 import com.message.Message
+import com.pawegio.kandroid.runDelayedOnUiThread
 import com.pawegio.kandroid.toast
 import com.smailnet.eamil.Utils.AESCipher
 import com.smailnet.eamil.Utils.AESToolsCipher
@@ -1767,7 +1768,6 @@ class GroupChatActivity : BaseActivity(), GroupChatContract.View , PNRouterServi
 
     override fun sendGroupToxFileRsp(jSendToxFileRsp: JGroupSendFileDoneRsp) {
         chatFragment?.onToxFileSendRsp(jSendToxFileRsp)
-
     }
 
     override fun readMsgPushRsp(jReadMsgPushRsp: JReadMsgPushRsp) {

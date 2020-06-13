@@ -1,26 +1,16 @@
 package com.stratagile.pnrouter.ui.adapter.conversation
 
 import android.view.View
-import android.widget.ImageView
 import android.widget.TextView
-import com.bumptech.glide.Glide
 import com.chad.library.adapter.base.BaseQuickAdapter
 import com.chad.library.adapter.base.BaseViewHolder
-import com.pawegio.kandroid.loadAnimation
 import com.socks.library.KLog
 import com.stratagile.pnrouter.R
 import com.stratagile.pnrouter.application.AppConfig
-import com.stratagile.pnrouter.constant.ConstantValue
 import com.stratagile.pnrouter.db.EmailContactsEntityDao
 import com.stratagile.pnrouter.db.EmailMessageEntity
-import com.stratagile.pnrouter.entity.JPullFileListRsp
-import com.stratagile.pnrouter.entity.MenuItemView
-import com.stratagile.pnrouter.entity.ShareBean
 import com.stratagile.pnrouter.utils.*
 import com.stratagile.pnrouter.view.ImageButtonWithText
-import com.stratagile.pnrouter.view.SmoothCheckBox
-import kotlinx.android.synthetic.main.activity_qrcode.*
-import java.util.*
 
 class EmaiMessageAdapter(arrayList: MutableList<EmailMessageEntity>) : BaseQuickAdapter<EmailMessageEntity, BaseViewHolder>(R.layout.email_row_item, arrayList) {
     override fun convert(helper: BaseViewHolder, item: EmailMessageEntity, payloads: MutableList<Any>) {
@@ -39,7 +29,11 @@ class EmaiMessageAdapter(arrayList: MutableList<EmailMessageEntity>) : BaseQuick
             originalTextCunNew =  originalTextCunNew.substring(0,endIndex)*/
             message.setText(originalTextCun.trim())
         } else {
-            message.setText(item.contentText.trim())
+            if (item.contentText.trim().length > 50) {
+                message.setText(item.contentText.trim().substring(0, 49))
+            } else {
+                message.setText(item.contentText.trim())
+            }
         }
 
         var unseen = helper.getView<TextView>(R.id.unseen)
@@ -84,11 +78,11 @@ class EmaiMessageAdapter(arrayList: MutableList<EmailMessageEntity>) : BaseQuick
     var isChooseMode = false
     override fun convert(helper: BaseViewHolder, item: EmailMessageEntity) {
         var formName = ""
-        var from = item.from;
+        var from = item.from_;
         var account = ""
-        var menu = item.menu
+        var menu = item.menu_
         if (menu.contains("Sent") || menu.contains("已发") || menu.contains("Drafts") || menu.contains("草稿")) {
-            from = item.to;
+            from = item.to_;
             if (from.contains(",")) {
                 var formList = from.split(",")
                 for (item in formList) {
@@ -143,10 +137,10 @@ class EmaiMessageAdapter(arrayList: MutableList<EmailMessageEntity>) : BaseQuick
         formName = formName.replace("\"", "")
         title.setText(formName)
         var subject = helper.getView<TextView>(R.id.subject)
-        subject.setText(item.subject)
+        subject.setText(item.subject_)
 
         var time = helper.getView<TextView>(R.id.time)
-        time.setText(DateUtil.getTimestampString(DateUtil.getDate(item.date), AppConfig.instance))
+        time.setText(DateUtil.getTimestampString(DateUtil.getDate(item.date_), AppConfig.instance))
 
 
         var ivAvatar = helper.getView<ImageButtonWithText>(R.id.avatar)
@@ -171,7 +165,11 @@ class EmaiMessageAdapter(arrayList: MutableList<EmailMessageEntity>) : BaseQuick
                 originalTextCunNew =  originalTextCunNew.substring(0,endIndex)*/
                 message.setText(originalTextCun.trim())
             } else {
-                message.setText(item.contentText.trim())
+                if (item.contentText.trim().length > 50) {
+                    message.setText(item.contentText.trim().substring(0, 49))
+                } else {
+                    message.setText(item.contentText.trim())
+                }
             }
 
 

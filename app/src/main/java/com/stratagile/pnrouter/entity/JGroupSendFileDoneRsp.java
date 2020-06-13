@@ -10,16 +10,8 @@ public class JGroupSendFileDoneRsp extends BaseEntity{
      * params : {"Action":"GroupSendFileDone","RetCode":0,"ToId":"DF7A116D4B26A5C0836DB8172C935EC28DD042708E49326FFF97845993AF6B444390E50B3FE2","MsgId":7,"GId":"group1_admin4_time1553236916AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA","Gname":"dG94MzIy","FileName":"5kfNrqdJ3qRxpgLuUTRM5JremRNkDZYHogc4fjhfMv6LEk3Mqr8qTUXvbkRE2i5GeuxKjVziTCPX2hAT59pWwnU2wSUDK2co9zzSB1sL","FileId":"1553255266","FileType":1,"UserKey":"O7NBZl3pcGHbtpFngQePx8WjT+jHjOVN34iAaK6IcTDOnbAHp36zJlbkcPS37exRaRI4mWQi2kXls3Vh47NlLD17x9G4scgkiVu59XA2sho="}
      */
 
-    private int timestampX;
     private ParamsBean params;
 
-    public int getTimestampX() {
-        return timestampX;
-    }
-
-    public void setTimestampX(int timestampX) {
-        this.timestampX = timestampX;
-    }
 
     public ParamsBean getParams() {
         return params;

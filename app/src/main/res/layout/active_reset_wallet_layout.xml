@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/parent"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:id="@+id/ll_popup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="Add Wallets"
+            android:layout_marginTop="23dp"
+            android:layout_marginLeft="15dp"
+            android:textColor="@color/FF1E1E24"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="Only valid wallet address can receive the rewards."
+            android:layout_marginTop="12dp"
+            android:layout_marginLeft="15dp"
+            android:textColor="@color/FF9496A1"
+            android:textSize="13sp"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="NEO Wallet to receive QLC"
+            android:layout_marginTop="15dp"
+            android:layout_marginLeft="15dp"
+            android:textColor="@color/FF1E1E24"
+            android:textSize="15sp"
+            android:layout_height="wrap_content"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:background="@drawable/bg_add_wallet"
+            android:gravity="center_vertical"
+            android:layout_height="40dp">
+            <ImageView
+                android:layout_width="20dp"
+                android:src="@mipmap/sheet_qlc"
+                android:layout_marginLeft="12dp"
+                android:layout_height="20dp"/>
+            <EditText
+                android:id="@+id/etNeoWalletAddress"
+                android:layout_width="0dp"
+                android:background="@null"
+                android:layout_marginLeft="10dp"
+                android:textSize="15sp"
+                android:textColor="@color/FF1E1E24"
+                android:hint="NEO Wallet Address"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="QLC Chain Wallet to receive QGAS"
+            android:layout_marginTop="15dp"
+            android:layout_marginLeft="15dp"
+            android:textColor="@color/FF1E1E24"
+            android:textSize="15sp"
+            android:layout_height="wrap_content"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:background="@drawable/bg_add_wallet"
+            android:gravity="center_vertical"
+            android:layout_height="40dp">
+            <ImageView
+                android:layout_width="20dp"
+                android:src="@mipmap/sheet_qgas"
+                android:layout_marginLeft="12dp"
+                android:layout_height="20dp"/>
+            <EditText
+                android:id="@+id/etQlcWalletAddress"
+                android:layout_width="0dp"
+                android:background="@null"
+                android:layout_marginLeft="10dp"
+                android:textSize="15sp"
+                android:textColor="@color/FF1E1E24"
+                android:hint="QLC Chain Wallet Address"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvAddWallet"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="20dp"
+            android:gravity="center"
+            android:background="@drawable/bg_add_wallet_bt"
+            android:textColor="@color/white"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="15dp"
+            android:textSize="15sp"
+            android:text="Add Wallet"
+            android:layout_marginRight="15dp"
+            android:layout_height="48dp"/>
+    </LinearLayout>
+
+</RelativeLayout>

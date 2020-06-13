@@ -11,8 +11,8 @@
     <uses-permission android:name="android.permission.RECEIVE_USER_PRESENT" />
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
     <!-- Optional for location -->
-        <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-        <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!--    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />&lt;!&ndash; Android Q后台定位权限&ndash;&gt;-->
     <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
@@ -69,10 +69,10 @@
         android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
+        android:banner="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:largeHeap="true"
         android:networkSecurityConfig="@xml/network_security_config"
-        android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme.Base"
         tools:replace="android:allowBackup">
@@ -112,6 +112,7 @@
         <activity
             android:name=".ui.activity.main.MainActivity"
             android:launchMode="singleTask"
+            android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@style/SplashTheme"
             android:windowSoftInputMode="stateHidden">
@@ -119,6 +120,16 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="*/*" />
+<!--                <data-->
+<!--                    android:host="confidant"-->
+<!--                    android:path="/active/"-->
+<!--                    android:scheme="app" />-->
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="com.stratagile.active" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
         </activity>
         <activity
@@ -562,12 +573,12 @@
             android:enabled="true"
             android:exported="true" />
 
-        <receiver android:name=".data.receiver.BootReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="org.thoughtcrime.securesms.RESTART" />
-            </intent-filter>
-        </receiver>
+<!--        <receiver android:name=".data.receiver.BootReceiver">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.BOOT_COMPLETED" />-->
+<!--                <action android:name="org.thoughtcrime.securesms.RESTART" />-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
         <provider
             android:name=".utils.MyFileProvider"
             android:authorities="${applicationId}.utils.MyFileProvider"
@@ -764,10 +775,15 @@
                 <category android:name="${applicationId}" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.activity.main.ShareFileActivity" >
-        </activity>
+        <activity android:name=".ui.activity.main.ShareFileActivity"></activity>
         <activity android:name=".ui.activity.email.EmailSelectAttachmentActivity" />
         <activity android:name=".ui.activity.email.EmailFileAttachmentShowActivity" />
+        <activity android:name=".ui.activity.main.ActiveListActivity"></activity>
+        <activity android:name=".ui.activity.main.FeedBackActivity" />
+        <activity android:name=".ui.activity.feedback.AddFeedBackActivity" android:windowSoftInputMode="stateHidden|adjustResize"/>
+        <activity android:name=".ui.activity.feedback.FeedbackChooseActivity" />
+        <activity android:name=".ui.activity.feedback.FeedbackDetailActivity" />
+        <activity android:name=".ui.activity.feedback.FeedbackAddActivity" />
 
         <!-- since 3.3.0 Required SDK 核心功能-->
         <!-- 可配置android:process参数将PushService放在其他进程中 -->
@@ -786,10 +802,12 @@
             android:value="developer-default" />
         <meta-data
             android:name="JPUSH_APPKEY"
-            android:value="590fe4b2a75e8f169cab50fd" /> <!--  </>值来自开发者平台取得的AppKey-->
+            android:value="590fe4b2a75e8f169cab50fd" /> <!--  </>测试-->
+        <!--            android:value="590fe4b2a75e8f169cab50fd" /> &lt;!&ndash;  </>值来自开发者平590fe4b2a75e8f169cab50fd台取得的AppKey&ndash;&gt;-->
+        <!--        华为hms自动初始化-->
         <meta-data
             android:name="push_kit_auto_init_enabled"
-            android:value="true" />
+            android:value="false" />
 
         <service
             android:name="com.stratagile.pnrouter.data.service.MyPushService"
@@ -809,7 +827,7 @@
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/ic_camera" />
+            android:resource="@mipmap/ic_launcher" />
         <!-- Set color used with incoming notification messages. This is used when no color is set for the incoming
              notification message. See README(https://goo.gl/6BKBk7) for more. -->
         <meta-data

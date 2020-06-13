@@ -1411,6 +1411,7 @@ class EmailCore {
         KLog.i("time_" + "imapStoreEnd:" + TimeUtil.getTime());
         IMAPFolder folder = (IMAPFolder) imapStore.getFolder(menu);
         folder.open(Folder.READ_ONLY);
+        KLog.i("time_" + "folder.open:" + TimeUtil.getTime());
         int totalUnreadCount = folder.getUnreadMessageCount();
         Message[] messagesAll = new Message[]{};
         int totalSize = folder.getMessageCount();

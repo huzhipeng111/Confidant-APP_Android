@@ -6,6 +6,15 @@ import com.hyphenate.chat.adapter.message.EMAMessage;
 public class UnReadEMMessage {
     private int unReadCount = 0;
     private String draft;
+    private ActiveList activeList;
+
+    public ActiveList getActiveList() {
+        return activeList;
+    }
+
+    public void setActiveList(ActiveList activeList) {
+        this.activeList = activeList;
+    }
 
     public String getDraft() {
         return draft;

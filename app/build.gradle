@@ -35,8 +35,8 @@ android {
         applicationId "com.stratagile.pnrouter"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode getSelfDefinedVersion("code") + 2
-        versionName "1.3.6"
+        versionCode getSelfDefinedVersion("code") + 10
+        versionName "1.4.4"
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -53,6 +53,7 @@ android {
         manifestPlaceholders = [
                 JPUSH_PKGNAME : applicationId,
                 JPUSH_APPKEY : "590fe4b2a75e8f169cab50fd", //JPush 上注册的包名对应的 Appkey.
+//                JPUSH_APPKEY : "cdd9a878c1d5af95023a9088", //JPush 测试 Appkey.
                 JPUSH_CHANNEL : "developer-default", //暂时填写默认值即可.
         ]
     }
@@ -177,7 +178,7 @@ android {
     }
 }
 greendao {
-    schemaVersion 101//数据库版本号
+    schemaVersion 104//数据库版本号
     daoPackage 'com.stratagile.pnrouter.db'//设置DaoMaster、DaoSession、Dao包名
     targetGenDir 'src/main/java'//设置DaoMaster、DaoSession、Dao目录
     //targetGenDirTest：设置生成单元测试目录
@@ -354,6 +355,9 @@ dependencies {
 
     implementation 'com.huawei.hms:push:4.0.3.301'
 
+    implementation 'me.shouheng.compressor:compressor:1.3.5'
+//    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+    implementation 'com.ycjiang:ImagePreview:2.3.5'
     //implementation 'com.github.ihsanbal:LoggingInterceptor:2.0.5'
 }
 

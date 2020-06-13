@@ -518,7 +518,7 @@ public class EaseChatFragment extends EaseBaseFragment implements EMMessageListe
 
                         }
                         eMMessage.setMsgId(LogIdIdResult + "");
-                        eMMessage.setMsgTime(Long.valueOf(LogIdIdResult));
+                        eMMessage.setMsgTime(Long.valueOf(fileTransformStatus.getServerTime() + "") * 1000);
                         eMMessage.setAcked(true);
                         sendMessageTo(eMMessage);
                         //conversation.updateMessage(eMMessage);
@@ -1172,8 +1172,8 @@ public class EaseChatFragment extends EaseBaseFragment implements EMMessageListe
                                 }
                             }
 
-                            //messageData.setMsgTime(message.getTimeStamp() * 1000);
-                            messageData.setMsgTime(Long.valueOf(message.getMsgId()));
+                            messageData.setMsgTime(message.getTimeStamp() * 1000);
+//                            messageData.setMsgTime(Long.valueOf(message.getMsgId()));
                             messageData.setMsgId(message.getMsgId() + "");
                             sendMessageTo(messageData);
                         }
@@ -1289,7 +1289,11 @@ public class EaseChatFragment extends EaseBaseFragment implements EMMessageListe
                         {
                             msgSouce = new String(RxEncodeTool.base64Decode(Message.getMsg()));
                         }else{
-                            msgSouce = LibsodiumUtil.INSTANCE.DecryptFriendMsg(Message.getMsg(), Message.getNonce(), FriendId, Message.getSign(),ConstantValue.INSTANCE.getLibsodiumprivateMiKey(),friendEntity.getSignPublicKey());
+                            if (Message.getMsgType() == 0x11) {
+                                msgSouce = new String(RxEncodeTool.base64Decode(Message.getMsg()));
+                            } else {
+                                msgSouce = LibsodiumUtil.INSTANCE.DecryptFriendMsg(Message.getMsg(), Message.getNonce(), FriendId, Message.getSign(),ConstantValue.INSTANCE.getLibsodiumprivateMiKey(),friendEntity.getSignPublicKey());
+                            }
                         }
 
                     }
@@ -1540,6 +1544,9 @@ public class EaseChatFragment extends EaseBaseFragment implements EMMessageListe
 
                     }
                     break;
+                case 0x11:
+                    message = EMMessage.createTxtSendMessage(Message.getMsg(), toChatUserId);
+                    break;
                 default:
                     break;
             }
@@ -1575,7 +1582,7 @@ public class EaseChatFragment extends EaseBaseFragment implements EMMessageListe
                 message.setTo(userId);
                 message.setDirection(EMMessage.Direct.RECEIVE);
             }
-            message.setMsgTime(Message.getMsgId());
+            message.setMsgTime(Message.getTimeStamp());
             if (i == 0) {
                 MsgStartId = Message.getMsgId();
             }
@@ -2737,7 +2744,7 @@ public class EaseChatFragment extends EaseBaseFragment implements EMMessageListe
                 String userId = SpUtil.INSTANCE.getString(getActivity(), ConstantValue.INSTANCE.getUserId(), "");
                 String userSn = SpUtil.INSTANCE.getString(getActivity(), ConstantValue.INSTANCE.getUserSnSp(), "");
                 Gson gson = new Gson();
-                sendMessageData.setTimeStamp(jSendMsgRsp.getTimestamp());
+                sendMessageData.setTimeStamp(jSendMsgRsp.getTimestamp() * 1000);
                 String baseDataJson = gson.toJson(sendMessageData);
                 SpUtil.INSTANCE.putString(AppConfig.instance, ConstantValue.INSTANCE.getMessage() + userSn + "_" + toChatUserId, baseDataJson);
                 if (conversation != null) {
@@ -2745,7 +2752,7 @@ public class EaseChatFragment extends EaseBaseFragment implements EMMessageListe
                         conversation.removeMessage(jSendMsgRsp.getMsgid() + "");
                         forward_msg.setMsgId(jSendMsgRsp.getParams().getMsgId() + "");
                         forward_msg.setAcked(true);
-                        forward_msg.setMsgTime(jSendMsgRsp.getParams().getMsgId());
+                        forward_msg.setMsgTime(jSendMsgRsp.getTimestamp() * 1000);
                         conversation.insertMessage(forward_msg);
                         Log.i("消息时间:sendback:",jSendMsgRsp.getTimestamp()+"");
                         KLog.i("insertMessage:" + "Message:" + jSendMsgRsp.getParams().getMsgId());
@@ -2810,7 +2817,7 @@ public class EaseChatFragment extends EaseBaseFragment implements EMMessageListe
                     if (forward_msg != null) {
                         conversation.removeMessage(jSendMsgRsp.getParams().getMsgId() + "");
                         forward_msg.setMsgId(jSendMsgRsp.getParams().getNewId() + "");
-                        forward_msg.setMsgTime(jSendMsgRsp.getParams().getNewId());
+                        forward_msg.setMsgTime(jSendMsgRsp.getTimestamp());
                         forward_msg.setAcked(true);
                         conversation.insertMessage(forward_msg);
                         KLog.i("insertMessage:" + "Frorward" + jSendMsgRsp.getParams().getNewId());
@@ -4574,7 +4581,7 @@ public class EaseChatFragment extends EaseBaseFragment implements EMMessageListe
         message.setDirection(EMMessage.Direct.RECEIVE);
         message.setMsgId(jPushMsgRsp.getParams().getMsgId() + "");
         message.setFrom(jPushMsgRsp.getParams().getFromId());
-        message.setMsgTime(jPushMsgRsp.getParams().getMsgId());
+        message.setMsgTime(jPushMsgRsp.getTimestamp() * 1000);
         message.setTo(jPushMsgRsp.getParams().getToId());
 
         Gson gson = new Gson();
@@ -4583,7 +4590,7 @@ public class EaseChatFragment extends EaseBaseFragment implements EMMessageListe
         Message.setMsgId(jPushMsgRsp.getParams().getMsgId());
         Message.setFrom(jPushMsgRsp.getParams().getFromId());
         Message.setTo(jPushMsgRsp.getParams().getToId());
-        Message.setTimeStamp(jPushMsgRsp.getTimestamp());
+        Message.setTimeStamp(jPushMsgRsp.getTimestamp() * 1000);
         //Message.setTimeStamp(System.currentTimeMillis() / 1000);
         Message.setUnReadCount(0);
         Message.setChatType(ChatType.Chat);
@@ -4633,14 +4640,14 @@ public class EaseChatFragment extends EaseBaseFragment implements EMMessageListe
         message.setMsgId(jPushMsgRsp.getParams().getMsgId() + "");
         message.setFrom(jPushMsgRsp.getParams().getFrom());
         message.setTo(jPushMsgRsp.getParams().getTo());
-        message.setMsgTime(jPushMsgRsp.getParams().getMsgId());
+        message.setMsgTime(jPushMsgRsp.getTimestamp() * 1000);
         Gson gson = new Gson();
         Message Message = new Message();
         Message.setMsg(jPushMsgRsp.getParams().getMsg());
         Message.setMsgId(jPushMsgRsp.getParams().getMsgId());
         Message.setFrom(jPushMsgRsp.getParams().getFrom());
         Message.setTo(jPushMsgRsp.getParams().getTo());
-        Message.setTimeStamp(jPushMsgRsp.getTimestamp());
+        Message.setTimeStamp(jPushMsgRsp.getTimestamp() * 1000);
         //Message.setTimeStamp(System.currentTimeMillis() / 1000);
         Log.i("消息时间:receiver:",jPushMsgRsp.getTimestamp()+"");
         Message.setUnReadCount(0);
@@ -4716,7 +4723,7 @@ public class EaseChatFragment extends EaseBaseFragment implements EMMessageListe
             message.setMsgId(msgId);
             message.setFrom(fromId);
             message.setTo(toId);
-            message.setMsgTime(Long.valueOf(msgId));
+            message.setMsgTime(Long.parseLong(timeStamp + "") * 1000);
             sendMessageTo(message);
         }
 
@@ -5437,7 +5444,7 @@ public class EaseChatFragment extends EaseBaseFragment implements EMMessageListe
                                     }
                                 }
 
-                                messageData.setMsgTime(message.getMsgId());
+                                messageData.setMsgTime(message.getTimeStamp());
                                 messageData.setMsgId(message.getMsgId() + "");
 
                                 sendMessageTo(messageData);

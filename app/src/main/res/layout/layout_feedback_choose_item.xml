@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_height="51dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:gravity="center_vertical"
+        android:layout_height="50dp">
+        <TextView
+            android:id="@+id/tvContent"
+            android:textSize="15sp"
+            android:textColor="@color/FF1E1E24"
+            android:layout_marginLeft="15dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"/>
+        <ImageView
+            android:id="@+id/ivSelect"
+            android:src="@mipmap/ic_verified"
+            android:layout_marginRight="15dp"
+            android:layout_width="30dp"
+            android:layout_height="18dp"/>
+    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:background="@color/color_f5f5f5"
+        android:layout_height="1dp"/>
+</LinearLayout>

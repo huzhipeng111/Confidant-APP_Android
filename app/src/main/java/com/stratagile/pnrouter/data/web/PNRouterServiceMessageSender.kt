@@ -117,14 +117,21 @@ class PNRouterServiceMessageSender @Inject constructor(pipe: Optional<SignalServ
     fun send(message: BaseData) {
         Log.i("sender", "添加")
         DotLog.sendLog(message)
+        KLog.i(message.params.toString())
         toSendMessage.offer(message)
         Log.i("sender_thread.state", (thread.state == Thread.State.NEW).toString())
-        /*if (thread.state == Thread.State.NEW) {
-            thread.start()
-        }*/
         sendOtherMessage()
-//        javaObject.notifyAll()
-//        return sendMessageTo()
+    }
+
+    fun sendReadMsg(message: BaseData) {
+        val userId = SpUtil.getString(AppConfig.instance, ConstantValue.userId, "")
+        if (msgHashMap.get(userId) == null) {
+            msgHashMap.put(userId!!, ConcurrentLinkedQueue())
+            toSendChatMessage = msgHashMap.get(userId!!) as ConcurrentLinkedQueue<BaseData>
+        } else {
+            toSendChatMessage = msgHashMap.get(userId!!) as ConcurrentLinkedQueue<BaseData>
+        }
+        toSendChatMessage.offer(message)
     }
 
     /**

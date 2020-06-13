@@ -595,5 +595,7 @@
     <string name="At_least_one_good_friend">At least one good friend</string>
     <string name="Input_parameter_error">Input parameter error</string>
     <string name="upper_limit">The group has reached the upper limit</string>
+    <string name="campaign_update">Campaign Updates</string>
+    <string name="feedback">Feedback</string>
 
 </resources>

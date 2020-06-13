@@ -77,6 +77,9 @@ class MyFragment : BaseFragment(), MyContract.View {
             intent.putExtra("flag",0)
             startActivity(intent)
         }
+        feedback.setOnClickListener {
+            startActivity(Intent(activity, FeedBackActivity::class.java))
+        }
         status.text = SpUtil.getString(activity!!, ConstantValue.status, "")
         version.text = getString(R.string.version) +""+ BuildConfig.VERSION_NAME +"("+getString(R.string.Build)+BuildConfig.VERSION_CODE+")"
         nickName.text = SpUtil.getString(activity!!, ConstantValue.username, "")

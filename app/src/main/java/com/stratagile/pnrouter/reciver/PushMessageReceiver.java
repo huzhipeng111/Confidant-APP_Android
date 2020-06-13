@@ -30,18 +30,25 @@ public class PushMessageReceiver extends JPushMessageReceiver {
     @Override
     public void onNotifyMessageOpened(Context context, NotificationMessage message) {
         Log.e(TAG,"[onNotifyMessageOpened] "+message);
-        try{
-            //打开自定义的Activity
-            Intent i = new Intent(context, TestJPushActivity.class);
-            Bundle bundle = new Bundle();
-            bundle.putString(JPushInterface.EXTRA_NOTIFICATION_TITLE,message.notificationTitle);
-            bundle.putString(JPushInterface.EXTRA_ALERT,message.notificationContent);
-            i.putExtras(bundle);
-            //i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP );
-            context.startActivity(i);
-        }catch (Throwable throwable){
-
+        if (message.notificationContent != null && message.notificationContent.contains("You have a NEW message!")) {
+            try{
+                //打开自定义的Activity
+                Intent i = new Intent(context, MainActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(i);
+            }catch (Throwable throwable){
+                throwable.printStackTrace();
+            }
+        } else {
+            try{
+                //打开自定义的Activity
+                Intent i = new Intent(context, MainActivity.class);
+                i.putExtra("confidantExtra", "active");
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(i);
+            }catch (Throwable throwable){
+                throwable.printStackTrace();
+            }
         }
     }
 

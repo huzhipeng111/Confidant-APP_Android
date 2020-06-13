@@ -292,7 +292,7 @@ class ChatFragment : BaseFragment(), MessageProvider.ReceivedMessageListener {
             LogUtil.addLog("sendMsgV3 friendKey:",FriendMiPublicKey)
             var msgMap = LibsodiumUtil.EncryptSendMsg(Msg,friendMiPublic,ConstantValue.libsodiumprivateSignKey!!,ConstantValue.libsodiumprivateTemKey!!,ConstantValue.libsodiumpublicTemKey!!,ConstantValue.libsodiumpublicMiKey!!)
             var msgData = SendMsgReqV3(FromIndex!!, ToIndex!!, msgMap.get("encryptedBase64")!!,msgMap.get("signBase64")!!,msgMap.get("NonceBase64")!!,msgMap.get("dst_shared_key_Mi_My64")!!,"")
-
+            KLog.i("发送文字消息")
             if (ConstantValue.curreantNetworkType.equals("WIFI")) {
                 AppConfig.instance.getPNRouterServiceMessageSender().sendChatMsg(BaseData(3,msgData))
             }else if (ConstantValue.isToxConnected) {

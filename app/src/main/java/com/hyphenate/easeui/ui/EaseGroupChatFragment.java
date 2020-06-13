@@ -500,7 +500,7 @@ public class EaseGroupChatFragment extends EaseBaseFragment implements EMMessage
 
                     //messageData.setMsgTime(message.getTimeStamp() * 1000);
                     messageData.setMsgId(msgId + "");
-                    messageData.setMsgTime(Long.valueOf(msgId));
+                    messageData.setMsgTime(message.getTimeStamp() * 1000);
                     sendMessageTo(messageData);
                 }
             }
@@ -513,7 +513,7 @@ public class EaseGroupChatFragment extends EaseBaseFragment implements EMMessage
         KLog.i("错误：onFileTransformStatus:" + msgId);
 
         String friend = fileTransformStatus.getFriendId();
-        if (!friend.equals(toChatUserId)) {
+        if (!friend.contains(toChatUserId) && !toChatUserId.contains(friend)) {
             return;
         }
         String LogIdIdResult = fileTransformStatus.getLogIdIdResult();
@@ -1228,8 +1228,8 @@ public class EaseGroupChatFragment extends EaseBaseFragment implements EMMessage
                                 }
                             }
 
-                            //messageData.setMsgTime(message.getTimeStamp() * 1000);
-                            messageData.setMsgTime(Long.valueOf(message.getMsgId()));
+                            messageData.setMsgTime(message.getTimeStamp() * 1000);
+//                            messageData.setMsgTime(Long.valueOf(message.getMsgId()));
                             messageData.setMsgId(message.getMsgId() + "");
                             sendMessageTo(messageData);
                         }
@@ -1265,7 +1265,7 @@ public class EaseGroupChatFragment extends EaseBaseFragment implements EMMessage
             conversation.removeMessage(msgId);
             eMMessage.setMsgId(msgServerId);
             eMMessage.setAcked(true);
-            eMMessage.setMsgTime(Long.valueOf(msgServerId));
+            eMMessage.setMsgTime(jSendToxFileRsp.getTimestamp() * 1000);
             sendMessageTo(eMMessage);
             conversation.updateMessage(eMMessage);
             if (eMMessage.getType().equals(EMMessage.Type.IMAGE))
@@ -1699,7 +1699,7 @@ public class EaseGroupChatFragment extends EaseBaseFragment implements EMMessage
                 message.setDirection(EMMessage.Direct.RECEIVE);
             }
             //message.setMsgTime(Message.getTimeStamp() * 1000);
-            message.setMsgTime(Message.getMsgId());
+            message.setMsgTime(Message.getTimeStamp());
             if (i == 0) {
                 MsgStartId = Message.getMsgId();
             }
@@ -2947,7 +2947,7 @@ public class EaseGroupChatFragment extends EaseBaseFragment implements EMMessage
                 String userId = SpUtil.INSTANCE.getString(getActivity(), ConstantValue.INSTANCE.getUserId(), "");
                 String userSn = SpUtil.INSTANCE.getString(getActivity(), ConstantValue.INSTANCE.getUserSnSp(), "");
                 Gson gson = new Gson();
-                sendMessageData.setTimeStamp(jSendMsgRsp.getTimestamp());
+                sendMessageData.setTimeStamp(jSendMsgRsp.getTimestamp() *1000);
                 String baseDataJson = gson.toJson(sendMessageData);
                 SpUtil.INSTANCE.putString(AppConfig.instance, ConstantValue.INSTANCE.getMessage() + userSn + "_" + toChatUserId, baseDataJson);
                 if (conversation != null) {
@@ -2955,8 +2955,8 @@ public class EaseGroupChatFragment extends EaseBaseFragment implements EMMessage
                         conversation.removeMessage(jSendMsgRsp.getMsgid() + "");
                         forward_msg.setMsgId(jSendMsgRsp.getParams().getMsgId() + "");
                         forward_msg.setAcked(true);
-                        //forward_msg.setMsgTime(jSendMsgRsp.getTimestamp() *1000);
-                        forward_msg.setMsgTime(jSendMsgRsp.getParams().getMsgId());
+                        forward_msg.setMsgTime(jSendMsgRsp.getTimestamp() *1000);
+//                        forward_msg.setMsgTime(jSendMsgRsp.getTimestamp());
                         conversation.insertMessage(forward_msg);
                         KLog.i("insertGroupMessage:" + "EaseChatFragment" + "_upateMessage");
                         if (isMessageListInited) {
@@ -3014,14 +3014,14 @@ public class EaseGroupChatFragment extends EaseBaseFragment implements EMMessage
                 String userId = SpUtil.INSTANCE.getString(getActivity(), ConstantValue.INSTANCE.getUserId(), "");
                 String userSn = SpUtil.INSTANCE.getString(getActivity(), ConstantValue.INSTANCE.getUserSnSp(), "");
                 Gson gson = new Gson();
-                sendMessageData.setTimeStamp(jSendMsgRsp.getTimestamp());
+                sendMessageData.setTimeStamp(jSendMsgRsp.getTimestamp() *1000);
                 String baseDataJson = gson.toJson(sendMessageData);
                 SpUtil.INSTANCE.putString(AppConfig.instance, ConstantValue.INSTANCE.getMessage() + userSn + "_" + toChatUserId, baseDataJson);
                 if (conversation != null) {
                     if (forward_msg != null) {
                         conversation.removeMessage(jSendMsgRsp.getParams().getMsgId() + "");
                         forward_msg.setMsgId(jSendMsgRsp.getParams().getNewId() + "");
-                        forward_msg.setMsgTime(jSendMsgRsp.getParams().getNewId());
+                        forward_msg.setMsgTime(jSendMsgRsp.getTimestamp()  *1000);
                         forward_msg.setAcked(true);
                         conversation.insertMessage(forward_msg);
                         KLog.i("insertGroupMessage:" + "EaseChatFragment" + "_upateMessage");
@@ -4417,14 +4417,14 @@ public class EaseGroupChatFragment extends EaseBaseFragment implements EMMessage
             message.setMsgId(jPushMsgRsp.getParams().getMsgId() + "");
             message.setFrom(jPushMsgRsp.getParams().getFrom());
             message.setTo(jPushMsgRsp.getParams().getGId());
-            message.setMsgTime(jPushMsgRsp.getParams().getMsgId());
+            message.setMsgTime(jPushMsgRsp.getTimestamp() *1000);
             Gson gson = new Gson();
             Message Message = new Message();
             Message.setMsg(jPushMsgRsp.getParams().getMsg());
             Message.setMsgId(jPushMsgRsp.getParams().getMsgId());
             Message.setFrom(jPushMsgRsp.getParams().getFrom());
             Message.setTo(jPushMsgRsp.getParams().getGId());
-            Message.setTimeStamp(jPushMsgRsp.getTimestamp());
+            Message.setTimeStamp(jPushMsgRsp.getTimestamp() *1000);
             //Message.setTimeStamp(System.currentTimeMillis() / 1000);
             Message.setUnReadCount(0);
             Message.setChatType(ChatType.GroupChat);
@@ -4496,7 +4496,7 @@ public class EaseGroupChatFragment extends EaseBaseFragment implements EMMessage
         if (message != null) {
             message.setDirection(EMMessage.Direct.RECEIVE);
             message.setMsgId(msgId);
-            message.setMsgTime(Long.valueOf(msgId));
+            message.setMsgTime(Long.valueOf(timeStamp + "") * 1000);
             message.setFrom(fromId);
             message.setTo(toId);
             sendMessageTo(message);
@@ -5255,7 +5255,7 @@ public class EaseGroupChatFragment extends EaseBaseFragment implements EMMessage
                                 }
 
                                 //messageData.setMsgTime(message.getTimeStamp() * 1000);
-                                messageData.setMsgTime(message.getMsgId());
+                                messageData.setMsgTime(message.getTimeStamp());
                                 messageData.setMsgId(message.getMsgId() + "");
                                 sendMessageTo(messageData);
                             }

@@ -73,7 +73,10 @@
     <color name="grey">#dcdcdc</color>
     <color name="color_9496a1">#9496A1</color>
     <color name="color_6646f7">#6646F7</color>
+    <color name="color_dd6646f7">#dd6646F7</color>
     <color name="color_d0021b">#d0021b</color>
+    <color name="color_555555">#555555</color>
+    <color name="color_FAF8FF">#FAF8FF</color>
 
 
 </resources>

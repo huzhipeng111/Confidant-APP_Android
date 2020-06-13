@@ -25,6 +25,16 @@ public class JPushMsgRsp extends BaseEntity {
         private String Action;
         private String FromId;
         private String ToId;
+        private int MsgType;
+
+        public int getMsgType() {
+            return MsgType;
+        }
+
+        public void setMsgType(int msgType) {
+            MsgType = msgType;
+        }
+
         private int SrcMsgId;
         private String From;//发送消息用户hashid，14位字符串,不可为空
         private String To;//接收消息用户hashid，14位字符串,不可为空
@@ -45,7 +55,7 @@ public class JPushMsgRsp extends BaseEntity {
             {
                 return From;
             }else{
-                return FromId;
+                return From;
             }
 
         }
@@ -59,7 +69,7 @@ public class JPushMsgRsp extends BaseEntity {
             {
                 return To;
             }else{
-                return ToId;
+                return To;
             }
         }
 
