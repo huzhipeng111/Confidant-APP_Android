@@ -4021,7 +4021,7 @@ class MainActivity : BaseActivity(), MainContract.View, PNRouterServiceMessageRe
                     var lastLoginUserSn = FileUtil.getLocalUserData("usersn")
 
                     var map: HashMap<String, String> = HashMap()
-                    var os = VersionUtil.getDeviceBrand()
+                    var os = VersionUtil.deviceBrand
                     map.put("Os", os.toString())
                     map.put("RegionCode", countryCode)
                     map.put("RegionName", countryName)
@@ -4034,7 +4034,7 @@ class MainActivity : BaseActivity(), MainContract.View, PNRouterServiceMessageRe
                     map.put("HmsToken", ConstantValue.mHuaWeiRegId)
                     map.put("FcmToken", ConstantValue.fcmToken)
                     map.put("TimeStamp", System.currentTimeMillis().toString())
-                    map["RegHash"] = String(RxEncodeTool.base64Encode(ConstantValue.fcmToken + ConstantValue.mHuaWeiRegId + ConstantValue.mJiGuangRegId + ConstantValue.mRegId)).substring(0, 20)
+                    map["RegHash"] = MD5Util.getStringMD5(ConstantValue.fcmToken + ConstantValue.mHuaWeiRegId + ConstantValue.mJiGuangRegId + ConstantValue.mRegId)
 
                     KLog.i("小米推送注册RegId= " + ConstantValue.mRegId)
                     KLog.i("华为推送注册RegId= " + ConstantValue.mHuaWeiRegId)

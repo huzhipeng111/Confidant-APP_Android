@@ -148,7 +148,7 @@ class AppConfig : MultiDexApplication() {
         applicationHandler = Handler(mainLooper)
         mAppActivityManager = AppActivityManager(this)
         UserProvider.init()
-        if (VersionUtil.getDeviceBrand() == 3) {
+        if (VersionUtil.deviceBrand == 3) {
             KLog.i("华为推送初始化")
             thread {
                 try {

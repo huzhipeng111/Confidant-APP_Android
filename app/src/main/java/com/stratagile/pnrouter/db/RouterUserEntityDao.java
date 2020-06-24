@@ -34,6 +34,7 @@ public class RouterUserEntityDao extends AbstractDao<RouterUserEntity, Long> {
         public final static Property CreateTime = new Property(9, int.class, "CreateTime", false, "CREATE_TIME");
         public final static Property Qrcode = new Property(10, String.class, "Qrcode", false, "QRCODE");
         public final static Property NickSouceName = new Property(11, String.class, "nickSouceName", false, "NICK_SOUCE_NAME");
+        public final static Property Uid = new Property(12, int.class, "Uid", false, "UID");
     }
 
 
@@ -60,7 +61,8 @@ public class RouterUserEntityDao extends AbstractDao<RouterUserEntity, Long> {
                 "\"LAST_LOGIN_TIME\" INTEGER NOT NULL ," + // 8: LastLoginTime
                 "\"CREATE_TIME\" INTEGER NOT NULL ," + // 9: CreateTime
                 "\"QRCODE\" TEXT," + // 10: Qrcode
-                "\"NICK_SOUCE_NAME\" TEXT);"); // 11: nickSouceName
+                "\"NICK_SOUCE_NAME\" TEXT," + // 11: nickSouceName
+                "\"UID\" INTEGER NOT NULL );"); // 12: Uid
     }
 
     /** Drops the underlying database table. */
@@ -116,6 +118,7 @@ public class RouterUserEntityDao extends AbstractDao<RouterUserEntity, Long> {
         if (nickSouceName != null) {
             stmt.bindString(12, nickSouceName);
         }
+        stmt.bindLong(13, entity.getUid());
     }
 
     @Override
@@ -165,6 +168,7 @@ public class RouterUserEntityDao extends AbstractDao<RouterUserEntity, Long> {
         if (nickSouceName != null) {
             stmt.bindString(12, nickSouceName);
         }
+        stmt.bindLong(13, entity.getUid());
     }
 
     @Override
@@ -186,7 +190,8 @@ public class RouterUserEntityDao extends AbstractDao<RouterUserEntity, Long> {
             cursor.getInt(offset + 8), // LastLoginTime
             cursor.getInt(offset + 9), // CreateTime
             cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10), // Qrcode
-            cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11) // nickSouceName
+            cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11), // nickSouceName
+            cursor.getInt(offset + 12) // Uid
         );
         return entity;
     }
@@ -205,6 +210,7 @@ public class RouterUserEntityDao extends AbstractDao<RouterUserEntity, Long> {
         entity.setCreateTime(cursor.getInt(offset + 9));
         entity.setQrcode(cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10));
         entity.setNickSouceName(cursor.isNull(offset + 11) ? null : cursor.getString(offset + 11));
+        entity.setUid(cursor.getInt(offset + 12));
      }
     
     @Override

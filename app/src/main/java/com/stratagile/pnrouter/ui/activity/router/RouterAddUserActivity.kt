@@ -44,7 +44,7 @@ class RouterAddUserActivity : BaseActivity(), RouterAddUserContract.View {
 
     override fun initView() {
         ButterKnife.bind(this)
-        setToorBar(false)
+//        setToorBar(false)
        setContentView(R.layout.activity_router_adduser)
     }
     override fun initData() {

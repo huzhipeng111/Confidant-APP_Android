@@ -226,7 +226,7 @@ class RouterManagementActivity : BaseActivity(), RouterManagementContract.View, 
 
     var selectedRouter = RouterEntity()
     override fun initData() {
-//        title.text = getString(R.string.routerManagement)
+        title.text = getString(R.string.routerManagement)
         try {
             AppConfig.instance.messageReceiver!!.resetRouterNameCallBack = this
             AppConfig.instance.messageReceiver!!.qlcNodeCallBack = this

@@ -12,6 +12,15 @@ public class RouterUserEntity implements Parcelable{
     @Id(autoincrement = true)
     private Long id;
     private String UserSN;
+
+    public int getUid() {
+        return Uid;
+    }
+
+    public void setUid(int uid) {
+        Uid = uid;
+    }
+
     private int UserType;
     private int Active;
     private String IdentifyCode;
@@ -23,15 +32,15 @@ public class RouterUserEntity implements Parcelable{
     private String Qrcode;
     //昵称
     private String nickSouceName;
+    private int Uid;
 
 
 
 
-    @Generated(hash = 1588107425)
+    @Generated(hash = 272871314)
     public RouterUserEntity(Long id, String UserSN, int UserType, int Active,
             String IdentifyCode, String Mnemonic, String NickName, String UserId,
-            int LastLoginTime, int CreateTime, String Qrcode,
-            String nickSouceName) {
+            int LastLoginTime, int CreateTime, String Qrcode, String nickSouceName, int Uid) {
         this.id = id;
         this.UserSN = UserSN;
         this.UserType = UserType;
@@ -44,6 +53,7 @@ public class RouterUserEntity implements Parcelable{
         this.CreateTime = CreateTime;
         this.Qrcode = Qrcode;
         this.nickSouceName = nickSouceName;
+        this.Uid = Uid;
     }
 
     @Generated(hash = 893520339)
@@ -68,32 +78,7 @@ public class RouterUserEntity implements Parcelable{
         CreateTime = in.readInt();
         Qrcode = in.readString();
         nickSouceName = in.readString();
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        if (id == null) {
-            dest.writeByte((byte) 0);
-        } else {
-            dest.writeByte((byte) 1);
-            dest.writeLong(id);
-        }
-        dest.writeString(UserSN);
-        dest.writeInt(UserType);
-        dest.writeInt(Active);
-        dest.writeString(IdentifyCode);
-        dest.writeString(Mnemonic);
-        dest.writeString(NickName);
-        dest.writeString(UserId);
-        dest.writeInt(LastLoginTime);
-        dest.writeInt(CreateTime);
-        dest.writeString(Qrcode);
-        dest.writeString(nickSouceName);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
+        Uid = in.readInt();
     }
 
     public static final Creator<RouterUserEntity> CREATOR = new Creator<RouterUserEntity>() {
@@ -205,4 +190,30 @@ public class RouterUserEntity implements Parcelable{
     }
 
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        if (id == null) {
+            dest.writeByte((byte) 0);
+        } else {
+            dest.writeByte((byte) 1);
+            dest.writeLong(id);
+        }
+        dest.writeString(UserSN);
+        dest.writeInt(UserType);
+        dest.writeInt(Active);
+        dest.writeString(IdentifyCode);
+        dest.writeString(Mnemonic);
+        dest.writeString(NickName);
+        dest.writeString(UserId);
+        dest.writeInt(LastLoginTime);
+        dest.writeInt(CreateTime);
+        dest.writeString(Qrcode);
+        dest.writeString(nickSouceName);
+        dest.writeInt(Uid);
+    }
 }

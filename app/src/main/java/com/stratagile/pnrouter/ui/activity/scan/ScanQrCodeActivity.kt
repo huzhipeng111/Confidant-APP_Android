@@ -400,7 +400,7 @@ class ScanQrCodeActivity : BaseActivity(), ScanQrCodeContract.View, QRCodeView.D
             if (galleryPackName != "") {
                 intent.setPackage(galleryPackName)
             }
-            var os = VersionUtil.getDeviceBrand()
+            var os = VersionUtil.deviceBrand
             //这里要传一个整形的常量RESULT_LOAD_IMAGE到startActivityForResult()方法。
             if(os !==3)
             {
